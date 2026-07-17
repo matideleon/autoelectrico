@@ -1,0 +1,16 @@
+# ============================================================
+# autoelectrico.uy — robots.txt
+#
+# BLOQUEO TOTAL hasta que el sitio esté listo.
+# Google indexando fichas a medio llenar es deuda de SEO que
+# cuesta meses sacar. Cuando esté listo:
+#
+#   User-agent: *
+#   Allow: /
+#   Sitemap: https://autoelectrico.uy/sitemap.xml
+#
+# Cambialo recién cuando tengas ≥10 fichas publicadas.
+# ============================================================
+
+User-agent: *
+Disallow: /

@@ -1,0 +1,150 @@
+# ============================================================
+# evuy — Servicios
+#
+# EasyPanel se configura por UI, pero esto es la fuente de verdad
+# de qué corre y con qué. Sirve para levantarlo local idéntico a
+# producción, y para reconstruir el VPS si un día se pierde.
+#
+# En EasyPanel: crear cada servicio con estos valores.
+# NINGUNO se expone salvo `web`. Se hablan por nombre en la red
+# interna: postgres:5432, redis:6379, minio:9000.
+# ============================================================
+
+services:
+  postgres:
+    # pgvector/pgvector, NO postgres oficial: la imagen oficial no
+    # trae la extensión y compilarla después es un dolor.
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-evuy}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?falta POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-evuy}
+      # Locale español: afecta el ordenamiento de texto (ñ, acentos)
+      LANG: es_UY.utf8
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d:ro
+    # Tuning para VPS de 4-8 GB. maintenance_work_mem alto es para
+    # construir el índice ivfflat sin que el proceso muera.
+    command: >
+      postgres
+      -c shared_buffers=1GB
+      -c effective_cache_size=3GB
+      -c maintenance_work_mem=512MB
+      -c work_mem=32MB
+      -c max_connections=100
+      -c random_page_cost=1.1
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-evuy} -d ${POSTGRES_DB:-evuy}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    # NO exponer 5432. Para conectarte con un cliente, túnel SSH.
+    networks: [internal]
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    # allkeys-lru: cuando se llena, tira lo menos usado. El cache
+    # de chat es descartable; no queremos que Redis muera por OOM.
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks: [internal]
+
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:?falta S3_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:?falta S3_SECRET_KEY}
+      # Dominio público para las fotos de listings (detrás de Cloudflare)
+      MINIO_BROWSER_REDIRECT_URL: https://${CDN_DOMAIN:-cdn.autoelectrico.uy}
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks: [internal]
+
+  web:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile
+      target: web
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-evuy}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-evuy}
+      REDIS_URL: redis://redis:6379
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:?falta ANTHROPIC_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:?falta OPENAI_API_KEY}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      AUTH_SECRET: ${AUTH_SECRET:?falta AUTH_SECRET}
+      AUTH_URL: ${SITE_URL:-https://autoelectrico.uy}
+      NEXT_PUBLIC_SITE_URL: ${SITE_URL:-https://autoelectrico.uy}
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis:    { condition: service_healthy }
+    healthcheck:
+      # /api/health verifica Postgres de verdad, no solo que el
+      # proceso esté vivo. Devuelve 503 si la DB no responde.
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://127.0.0.1:3000/api/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 45s
+    networks: [internal, web]
+
+  worker:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile
+      target: worker
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-evuy}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-evuy}
+      REDIS_URL: redis://redis:6379
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis:    { condition: service_healthy }
+    # Un manual de 400 páginas necesita RAM. Sin límite, un PDF
+    # grande se lleva puesto el VPS entero.
+    mem_limit: 1g
+    networks: [internal]
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+
+networks:
+  internal:
+    driver: bridge
+  web:
+    external: true   # red de Traefik en EasyPanel

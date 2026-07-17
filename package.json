@@ -1,0 +1,40 @@
+{
+  "name": "autoelectrico-uy",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "worker": "node --experimental-strip-types worker/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test lib/**/*.test.ts",
+    "backup": "bash deploy/backup.sh",
+    "db:migrate": "psql $DATABASE_URL -f deploy/migrations/0001_init.sql && psql $DATABASE_URL -f deploy/migrations/0002_seed.sql",
+    "db:reset": "psql $DATABASE_URL -c 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;' && npm run db:migrate"
+  },
+  "dependencies": {
+    "next": "^14.2.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "pg": "^8.13.0",
+    "@anthropic-ai/sdk": "^0.34.0",
+    "ioredis": "^5.4.0",
+    "bullmq": "^5.25.0",
+    "pdfjs-dist": "^4.8.0",
+    "@aws-sdk/client-s3": "^3.700.0",
+    "@auth/pg-adapter": "^1.6.0",
+    "next-auth": "^5.0.0-beta.25"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "@types/node": "^22.0.0",
+    "@types/pg": "^8.11.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

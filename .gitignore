@@ -1,0 +1,27 @@
+# deps
+node_modules/
+.pnp
+.pnp.js
+
+# next
+.next/
+out/
+
+# env (NUNCA comitear)
+.env
+.env.local
+.env.*.local
+
+# build
+*.tsbuildinfo
+next-env.d.ts
+
+# os
+.DS_Store
+Thumbs.db
+
+# test
+coverage/
+
+# backups locales
+*.dump
