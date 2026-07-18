@@ -18,7 +18,7 @@
 set -euo pipefail
 
 SRC="${1:-}"
-PG_CONTAINER="${PG_CONTAINER:-evuy_postgres_1}"
+PG_CONTAINER="${PG_CONTAINER:-$(docker ps --filter name=autoelectrico_postgres --format '{{.Names}}' | head -n1)}"
 PG_USER="${POSTGRES_USER:-evuy}"
 PG_DB="${POSTGRES_DB:-evuy}"
 TMP_DB="${PG_DB}_restore_test"
