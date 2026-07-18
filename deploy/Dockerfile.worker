@@ -1,0 +1,29 @@
+# ============================================================
+# evuy — Imagen WORKER (BullMQ)
+# Multi-stage; target final: worker
+# ============================================================
+
+FROM node:22-slim AS base
+WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    fontconfig fonts-liberation \
+    && rm -rf /var/lib/apt/lists/*
+
+# ---------- Dependencias ----------
+FROM base AS deps
+COPY package.json package-lock.json* ./
+RUN npm ci --omit=dev && cp -R node_modules /prod_modules
+RUN npm ci
+
+# ---------- Worker ----------
+FROM base AS worker
+ENV NODE_ENV=production
+RUN groupadd -g 1001 nodejs && useradd -u 1001 -g nodejs -m worker
+
+COPY --from=deps --chown=worker:nodejs /prod_modules ./node_modules
+COPY --chown=worker:nodejs lib ./lib
+COPY --chown=worker:nodejs worker ./worker
+COPY --chown=worker:nodejs package.json ./
+
+USER worker
+CMD ["node", "--experimental-strip-types", "worker/index.ts"]
