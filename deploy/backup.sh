@@ -79,9 +79,10 @@ log "tablas con datos: $TABLES"
 # ---------- 3. Resolver IP interna de MinIO ----------
 # El host no resuelve el hostname del contenedor; lo hacemos
 # desde adentro de la red con getent (acepta el guion bajo).
+# La imagen mc no trae awk, así que usamos cut.
 log "resolviendo IP de MinIO"
 MINIO_IP=$(docker run --rm --network "$NETWORK" --entrypoint sh "$MC_IMAGE" \
-  -c "getent hosts $MINIO_HOST | awk '{print \$1; exit}'") || true
+  -c "getent hosts $MINIO_HOST | head -n1 | cut -d' ' -f1") || true
 MINIO_IP=$(echo "$MINIO_IP" | tr -d '[:space:]')
 [ -n "$MINIO_IP" ] || fail "no pude resolver la IP de MinIO"
 log "MinIO IP: $MINIO_IP"
