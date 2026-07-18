@@ -25,5 +25,8 @@ COPY --chown=worker:nodejs lib ./lib
 COPY --chown=worker:nodejs worker ./worker
 COPY --chown=worker:nodejs package.json ./
 
+# tsx resuelve imports TS sin extension explicita (evita ERR_MODULE_NOT_FOUND)
+RUN npm install --no-save tsx@4
+
 USER worker
-CMD ["node", "--experimental-strip-types", "worker/index.ts"]
+CMD ["npx", "tsx", "worker/index.ts"]
