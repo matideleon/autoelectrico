@@ -1,0 +1,36 @@
+# ============================================================
+# evuy — Imagen WEB (Next.js)
+# Multi-stage; target final: web
+# ============================================================
+
+FROM node:22-slim AS base
+WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    fontconfig fonts-liberation \
+    && rm -rf /var/lib/apt/lists/*
+
+# ---------- Dependencias ----------
+FROM base AS deps
+COPY package.json package-lock.json* ./
+RUN npm ci --omit=dev && cp -R node_modules /prod_modules
+RUN npm ci
+
+# ---------- Build ----------
+FROM base AS build
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN npm run build
+
+# ---------- Web ----------
+FROM base AS web
+ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3000
+RUN groupadd -g 1001 nodejs && useradd -u 1001 -g nodejs -m nextjs
+
+COPY --from=build --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=build --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=build --chown=nextjs:nodejs /app/public ./public
+
+USER nextjs
+EXPOSE 3000
+CMD ["node", "server.js"]
