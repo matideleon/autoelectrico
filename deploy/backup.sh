@@ -23,7 +23,7 @@ KEEP_DAILY=7
 KEEP_WEEKLY=4
 REMOTE="${BACKUP_REMOTE:-remote/evuy-backups}"
 
-PG_CONTAINER="${PG_CONTAINER:-evuy_postgres_1}"
+PG_CONTAINER="${PG_CONTAINER:-$(docker ps --filter name=autoelectrico_postgres --format '{{.Names}}' | head -n1)}"
 PG_USER="${POSTGRES_USER:-evuy}"
 PG_DB="${POSTGRES_DB:-evuy}"
 
