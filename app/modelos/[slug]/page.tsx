@@ -25,8 +25,14 @@ interface Props {
 
 /** Pre-genera todas las fichas publicadas en el build. */
 export async function generateStaticParams() {
-  const all = await models.listModels(null, { limit: 100 });
-  return all.map((m) => ({ slug: m.slug! }));
+  try {
+    const all = await models.listModels(null, { limit: 100 });
+    return all.map((m) => ({ slug: m.slug! }));
+  } catch {
+    // Durante el build la DB puede no estar disponible.
+    // Las páginas se generan on-demand en ese caso.
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
