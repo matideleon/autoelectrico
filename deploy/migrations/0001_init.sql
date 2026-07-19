@@ -29,7 +29,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION immutable_unaccent(text)
 RETURNS text AS $$
   SELECT unaccent('unaccent', $1)
-$$ LANGUAGE sql IMMUTABLE PARALLEL SAFE STRICT;
+$$ LANGUAGE sql IMMUTABLE PARALLEL SAFE STRICT SET search_path = public, pg_catalog;
 
 -- ------------------------------------------------------------
 -- Enums
