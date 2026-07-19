@@ -9,9 +9,9 @@
 // Idempotente: re-ingestar un doc borra sus chunks y rehace todo.
 // ============================================================
 
-import { transaction, query } from '../lib/db/client';
-import { chunkPages, type RawPage } from '../lib/rag/chunker';
-import { embedBatch, toVectorLiteral } from '../lib/rag/embeddings';
+import { transaction, query } from '../lib/db/client.ts';
+import { chunkPages, type RawPage } from '../lib/rag/chunker.ts';
+import { embedBatch, toVectorLiteral } from '../lib/rag/embeddings.ts';
 
 export interface IngestJobData {
   docId: string;
