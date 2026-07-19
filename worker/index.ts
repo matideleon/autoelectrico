@@ -9,8 +9,8 @@
 // ============================================================
 
 import { Worker, Queue, type ConnectionOptions } from 'bullmq';
-import { ingestDocument, type IngestJobData } from './ingest';
-import { pool } from '../lib/db/client';
+import { ingestDocument, type IngestJobData } from './ingest.ts';
+import { pool } from '../lib/db/client.ts';
 
 const connection: ConnectionOptions = {
   url: process.env.REDIS_URL ?? 'redis://redis:6379',
