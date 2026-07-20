@@ -160,6 +160,22 @@ export default function ChatWidget() {
     }
   }, [open]);
 
+  const fetchWithTimeout = async (url, options = {}, timeoutMs = 15000) => {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const res = await fetch(url, { ...options, signal: controller.signal });
+      clearTimeout(id);
+      return res;
+    } catch (err) {
+      clearTimeout(id);
+      if (err.name === 'AbortError') {
+        throw new Error('La consulta tardó demasiado. Probá de nuevo.');
+      }
+      throw err;
+    }
+  };
+
   const send = async () => {
     const q = input.trim();
     if (!q || loading) return;
@@ -169,13 +185,14 @@ export default function ChatWidget() {
     setMessages(updated);
     setInput('');
     setLoading(true);
+    setShowLead(false);
 
     try {
       const history = updated
         .filter(m => !m.system)
         .map(m => ({ role: m.role, content: m.content }));
 
-      const res = await fetch('/api/chat', {
+      const res = await fetchWithTimeout('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -187,7 +204,7 @@ export default function ChatWidget() {
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || 'Error del servidor');
+        throw new Error(err.error || `Error del servidor (${res.status})`);
       }
 
       const data = await res.json();
@@ -204,11 +221,18 @@ export default function ChatWidget() {
         setShowLead(true);
       }
     } catch (err) {
+      console.error('[chat] send failed:', err);
+      // Devolvemos la pregunta al input para que el usuario no la pierda.
+      setInput(q);
+      const isNetwork = /fetch|network|Failed to fetch|abort/i.test(err.message);
+      const errorText = isNetwork
+        ? 'No me pude conectar con el servidor. Revisá tu conexión y probá de nuevo.'
+        : err.message || 'No pude procesar tu consulta. Probá de nuevo en un momento.';
       setMessages(prev => [
         ...prev,
         {
           role: 'assistant',
-          content: 'No pude procesar tu consulta. Probá de nuevo en un momento.',
+          content: errorText,
           system: true,
         },
       ]);
