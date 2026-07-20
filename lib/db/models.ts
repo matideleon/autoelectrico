@@ -35,20 +35,22 @@ export async function listModels(
       `immutable_unaccent(?) ILIKE '%' || immutable_unaccent(m.brand || ' ' || m.model) || '%'`,
       filters.search
     );
-    const { where, params, nextIndex } = w.build();
-    const limit = Math.min(filters.limit ?? 50, 100);
+  }
 
-    return query<Partial<Model>>(
-      `SELECT ${LIST_COLS}
+  const { where, params, nextIndex } = w.build();
+  const limit = Math.min(filters.limit ?? 50, 100);
+
+  return query<Partial<Model>>(
+    `SELECT ${LIST_COLS}
      FROM models m
      ${where}
      ORDER BY m.price_usd ASC NULLS LAST
      LIMIT $${nextIndex} OFFSET $${nextIndex + 1}`,
-      [...params, limit, filters.offset ?? 0]
-    );
-  }
+    [...params, limit, filters.offset ?? 0]
+  );
+}
 
-  export async function getModelBySlug(
+export async function getModelBySlug(
     actor: Actor | null,
     slug: string
   ): Promise<Model | null> {
