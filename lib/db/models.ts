@@ -31,10 +31,15 @@ export async function listModels(
   w.add('m.connector_dc = ?', filters.connectorDc);
 
   if (filters.search) {
-    w.add(
-      `immutable_unaccent(?) ILIKE '%' || immutable_unaccent(m.brand || ' ' || m.model) || '%'`,
-      filters.search
-    );
+    // Full-text sobre brand + model: permite buscar "EX5" y encontrar
+    // "Geely EX5", o "Dolphin" y encontrar "BYD Dolphin".
+    const search = filters.search.replace(/[^\w\s]/g, '').trim();
+    if (search) {
+      w.add(
+        `to_tsvector('spanish', immutable_unaccent(m.brand || ' ' || COALESCE(m.model, ''))) @@ plainto_tsquery('spanish', immutable_unaccent(?))`,
+        search
+      );
+    }
   }
 
   const { where, params, nextIndex } = w.build();
