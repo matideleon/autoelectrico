@@ -4,7 +4,6 @@
 // ============================================================
 
 import type { Metadata } from 'next';
-import * as models from '@/lib/db/models';
 import { query } from '@/lib/db/client';
 import Comparador from '@/components/Comparador';
 import Nav from '@/components/Nav';
