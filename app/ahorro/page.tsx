@@ -19,7 +19,7 @@ export default function AhorroPage() {
   const [tipoCambio, setTipoCambio] = useState(40.5);
 
   // Calculations
-  const costoPorKmCombustion = (precioNafta * consumoCombustion) / 100;
+  const costoPorKmCombustion = consumoCombustion > 0 ? precioNafta / consumoCombustion : 0;
   const costoPorKmElectrico = (precioKwh * consumoElectrico) / 100;
   const ahorroMensual = (costoPorKmCombustion - costoPorKmElectrico) * kilometrosPorMes;
   const ahorroAnual = ahorroMensual * 12;
@@ -272,7 +272,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                   color: '#666',
                   fontSize: '14px'
                 }}>
-                  L/100km
+                  km/L
                 </span>
               </div>
             </div>
