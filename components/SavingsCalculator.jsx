@@ -35,7 +35,7 @@ const sans = "'IBM Plex Sans', -apple-system, sans-serif";
 const DEFAULTS = {
   kmMensuales: 1200,
   precioNafta: 88.67,          // ANCAP/URSEA, Nafta Súper, jul 2026
-  consumoNafta: 8,             // L/100km, auto compacto típico
+  rendimientoNafta: 12,        // km/L, auto compacto típico
   precioKwh: 10.31,            // UTE Tarifa Residencial Simple, tramo 101-600 kWh + IVA, abr 2026
   consumoEv: 15.6,             // kWh/100km, BYD Dolphin medido
   precioEvUsd: 32900,
@@ -71,14 +71,14 @@ function Field({ label, value, onChange, unit, source, step = 1 }) {
 export default function SavingsCalculator() {
   const [km, setKm] = useState(DEFAULTS.kmMensuales);
   const [precioNafta, setPrecioNafta] = useState(DEFAULTS.precioNafta);
-  const [consumoNafta, setConsumoNafta] = useState(DEFAULTS.consumoNafta);
+  const [rendimientoNafta, setRendimientoNafta] = useState(DEFAULTS.rendimientoNafta);
   const [precioKwh, setPrecioKwh] = useState(DEFAULTS.precioKwh);
   const [consumoEv, setConsumoEv] = useState(DEFAULTS.consumoEv);
   const [precioEvUsd, setPrecioEvUsd] = useState(DEFAULTS.precioEvUsd);
   const [tipoCambio, setTipoCambio] = useState(DEFAULTS.tipoCambio);
 
   const calc = useMemo(() => {
-    const costoNaftaKm = (precioNafta * consumoNafta) / 100;
+    const costoNaftaKm = precioNafta / rendimientoNafta;
     const costoEvKm = (precioKwh * consumoEv) / 100;
     const ahorroKm = costoNaftaKm - costoEvKm;
     const ahorroMensual = ahorroKm * km;
@@ -96,7 +96,7 @@ export default function SavingsCalculator() {
       precioEvUyu,
       paybackMeses,
     };
-  }, [km, precioNafta, consumoNafta, precioKwh, consumoEv, precioEvUsd, tipoCambio]);
+  }, [km, precioNafta, rendimientoNafta, precioKwh, consumoEv, precioEvUsd, tipoCambio]);
 
   const shareText = `Calculé mi ahorro pasándome a un eléctrico en autoelectrico.uy: ${
     calc.ahorroMensual > 0
@@ -144,10 +144,10 @@ export default function SavingsCalculator() {
               step={0.1}
             />
             <Field
-              label="Consumo"
-              value={consumoNafta}
-              onChange={setConsumoNafta}
-              unit="L/100km"
+              label="Rendimiento"
+              value={rendimientoNafta}
+              onChange={setRendimientoNafta}
+              unit="km/L"
               step={0.5}
             />
 
