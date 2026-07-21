@@ -32,7 +32,7 @@ export default async function ModelosPage() {
   return (
     <>
       <Nav />
-      <ModelGrid models={list.map(serialize)} />
+      <ModelGrid models={list.map(serialize) as unknown as Record<string, unknown>[]} />
     </>
   );
 }
