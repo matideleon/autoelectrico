@@ -5,8 +5,10 @@
 
 import type { Metadata } from 'next';
 import * as models from '@/lib/db/models';
-import ModelGrid from '@/components/ModelGrid';
+import ModelGridRaw from '@/components/ModelGrid';
 import Nav from '@/components/Nav';
+
+const ModelGrid = ModelGridRaw as unknown as (props: { models: Record<string, unknown>[] }) => JSX.Element;
 
 export const revalidate = 3600;
 
@@ -32,7 +34,7 @@ export default async function ModelosPage() {
   return (
     <>
       <Nav />
-      <ModelGrid models={list.map(serialize) as unknown as Record<string, unknown>[]} />
+      <ModelGrid models={list.map(serialize)} />
     </>
   );
 }
