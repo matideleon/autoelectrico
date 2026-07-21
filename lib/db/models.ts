@@ -42,9 +42,9 @@ export async function listModels(
 
     if (terms.length) {
       const expr = terms
-        .map((_, i) => `immutable_unaccent(m.brand || ' ' || COALESCE(m.model, '')) ILIKE immutable_unaccent($?)`)
+        .map((_, i) => `immutable_unaccent(m.brand || ' ' || COALESCE(m.model, '')) ILIKE immutable_unaccent($${i + 1})`)
         .join(' OR ');
-      w.add(expr, ...terms.map((t) => `%${t}%`));
+      w.add(`(${expr})`, ...terms.map((t) => `%${t}%`));
     }
   }
 
