@@ -171,8 +171,19 @@ function Cell({ row, m, isWinner, incomparable }) {
   );
 }
 
-export default function Comparador() {
-  const [picked, setPicked] = useState(['byd-dolphin-2026', 'geely-ex5-2026']);
+export default function Comparador({ models: dbModels }) {
+  /* Con datos de la DB los usa; sin ellos, el demo. pg manda
+     numeric como string: se normaliza a number acá. */
+  const MODELS_LIVE = (dbModels?.length ? dbModels : MODELS).map((m) => {
+    const out = { ...m };
+    for (const k of ['price_usd','battery_kwh','range_wltp_km','range_real_km','range_real_n','consumption_kwh_100','charge_ac_kw','charge_dc_kw','charge_10_80_min','power_hp','accel_0_100_s','seats','trunk_l']) {
+      if (out[k] != null) out[k] = Number(out[k]);
+    }
+    return out;
+  });
+
+  const defaults = MODELS_LIVE.slice(0, 2).map((m) => m.slug);
+  const [picked, setPicked] = useState(defaults);
 
   const toggle = (slug) => {
     setPicked((p) =>
@@ -182,7 +193,7 @@ export default function Comparador() {
     );
   };
 
-  const list = MODELS.filter((m) => picked.includes(m.slug));
+  const list = MODELS_LIVE.filter((m) => picked.includes(m.slug));
 
   return (
     <div style={S.root}>
@@ -200,7 +211,7 @@ export default function Comparador() {
 
         {/* Selector */}
         <div style={S.picker} role="group" aria-label="Elegir modelos">
-          {MODELS.map((m) => {
+          {MODELS_LIVE.map((m) => {
             const on = picked.includes(m.slug);
             return (
               <button
