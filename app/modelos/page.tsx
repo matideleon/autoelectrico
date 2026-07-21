@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 };
 
 /** pg devuelve numeric como string: normalizar antes de pasar al cliente. */
-function serialize(m: Record<string, unknown>) {
+function serialize(m: Record<string, unknown>): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(m)) {
     if (v instanceof Date) out[k] = v.toISOString();
