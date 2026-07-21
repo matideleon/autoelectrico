@@ -85,10 +85,14 @@ export class WhereBuilder {
   private clauses: string[] = [];
   private params: unknown[] = [];
 
-  add(clause: string, value: unknown): this {
-    if (value === undefined || value === null) return this;
-    this.params.push(value);
-    this.clauses.push(clause.replace('?', `$${this.params.length}`));
+  /** Cláusula con uno o más parámetros. Reemplaza cada '?' por $n,$n+1,... */
+  add(clause: string, ...values: unknown[]): this {
+    const validValues = values.filter((v) => v !== undefined && v !== null);
+    if (validValues.length === 0) return this;
+    let idx = 0;
+    const replaced = clause.replace(/\?/g, () => `$${this.params.length + ++idx}`);
+    this.params.push(...validValues);
+    this.clauses.push(replaced);
     return this;
   }
 
