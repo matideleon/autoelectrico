@@ -10,7 +10,7 @@ import { NextResponse } from 'next/server';
 import { query } from '@/lib/db/client';
 
 export const runtime = 'nodejs';
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 interface ModelRow {
   slug: string;
