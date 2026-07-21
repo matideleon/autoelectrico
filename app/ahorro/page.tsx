@@ -1,6 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+
+interface ModelOption {
+  slug: string;
+  brand: string;
+  model: string;
+  variant: string | null;
+  batteryKwh: number | null;
+  consumptionKwh100: number | null;
+  rangeWltpKm: number | null;
+  rangeRealKm: number | null;
+  priceUsd: number | null;
+}
 
 export default function AhorroPage() {
   // Input states
@@ -18,13 +30,68 @@ export default function AhorroPage() {
   const [precioElectrico, setPrecioElectrico] = useState(32900);
   const [tipoCambio, setTipoCambio] = useState(40.5);
 
+  // --- Selector de vehículo: datos reales de nuestra base ---
+  const [models, setModels] = useState<ModelOption[]>([]);
+  const [selectedBrand, setSelectedBrand] = useState('');
+  const [selectedSlug, setSelectedSlug] = useState('');
+  const [modelsError, setModelsError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/models')
+      .then((r) => r.json())
+      .then((data) => {
+        if (!cancelled) setModels(data.models ?? []);
+      })
+      .catch(() => {
+        if (!cancelled) setModelsError(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const brands = useMemo(
+    () => [...new Set(models.map((m) => m.brand))].sort(),
+    [models]
+  );
+
+  const modelsForBrand = useMemo(
+    () => models.filter((m) => m.brand === selectedBrand),
+    [models, selectedBrand]
+  );
+
+  const selectedModel = useMemo(
+    () => models.find((m) => m.slug === selectedSlug) ?? null,
+    [models, selectedSlug]
+  );
+
+  // Al elegir un modelo, autocompleta consumo y precio con datos reales.
+  // La persona igual puede editarlos después: esto es un punto de
+  // partida, no una imposición.
+  useEffect(() => {
+    if (!selectedModel) return;
+    if (selectedModel.consumptionKwh100 != null) {
+      setConsumoElectrico(selectedModel.consumptionKwh100);
+    }
+    if (selectedModel.priceUsd != null) {
+      setPrecioElectrico(selectedModel.priceUsd);
+    }
+  }, [selectedModel]);
+
   // Calculations
   const costoPorKmCombustion = consumoCombustion > 0 ? precioNafta / consumoCombustion : 0;
   const costoPorKmElectrico = (precioKwh * consumoElectrico) / 100;
   const ahorroMensual = (costoPorKmCombustion - costoPorKmElectrico) * kilometrosPorMes;
   const ahorroAnual = ahorroMensual * 12;
-  const precioElectricoUSD = precioElectrico / tipoCambio;
-  const amortizacionMeses = ahorroMensual > 0 ? precioElectrico / ahorroMensual : null;
+
+  // El campo "precio de compra" está en USD (así lo dice la unidad
+  // del input). El ahorro mensual está en pesos. Para la amortización
+  // hay que convertir el precio a pesos ANTES de dividir — dividir
+  // USD por UYU/mes daba un resultado sin sentido (meses en vez de
+  // años). Este era un bug real: mezclaba monedas.
+  const precioElectricoUYU = precioElectrico * tipoCambio;
+  const amortizacionMeses = ahorroMensual > 0 ? precioElectricoUYU / ahorroMensual : null;
   const amortizacionAnios = amortizacionMeses != null ? amortizacionMeses / 12 : null;
 
   const handleShare = () => {
@@ -40,8 +107,20 @@ export default function AhorroPage() {
 • Amortización: ${amortizacionAnios != null ? amortizacionAnios.toFixed(1) : 'N/A'} años
 
 Calculá el tuyo en autoelectrico.uy/ahorro`;
-    
+
     window.open(`https://wa.me/?text=${encodeURIComponent(mensaje)}`);
+  };
+
+  const selectStyle: React.CSSProperties = {
+    width: '100%',
+    background: '#141619',
+    border: '1px solid #2a2d33',
+    borderRadius: '4px',
+    padding: '12px',
+    color: '#fff',
+    fontSize: '16px',
+    fontFamily: 'IBM Plex Sans, sans-serif',
+    cursor: 'pointer',
   };
 
   return (
@@ -118,10 +197,10 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
         margin: '0 auto',
         padding: '0 20px 60px'
       }}>
-        
+
         {/* Left Panel - Inputs */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-          
+
           {/* TU USO */}
           <div style={{
             background: '#1B1E23',
@@ -195,7 +274,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
             }}>
               AUTO A COMBUSTIÓN
             </h2>
-            
+
             <div style={{ marginBottom: '20px' }}>
               <label style={{
                 display: 'block',
@@ -295,7 +374,79 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
             }}>
               AUTO ELÉCTRICO
             </h2>
-            
+
+            {/* Selector de vehículo: datos reales de nuestro catálogo */}
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                color: '#ccc',
+                marginBottom: '4px'
+              }}>
+                Elegí tu vehículo
+              </label>
+              <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>
+                Autocompleta consumo y precio. Podés editarlos después.
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '8px' }}>
+                <select
+                  value={selectedBrand}
+                  onChange={(e) => {
+                    setSelectedBrand(e.target.value);
+                    setSelectedSlug('');
+                  }}
+                  style={selectStyle}
+                >
+                  <option value="">Marca…</option>
+                  {brands.map((b) => (
+                    <option key={b} value={b}>{b}</option>
+                  ))}
+                </select>
+                <select
+                  value={selectedSlug}
+                  onChange={(e) => setSelectedSlug(e.target.value)}
+                  disabled={!selectedBrand}
+                  style={{ ...selectStyle, opacity: selectedBrand ? 1 : 0.5 }}
+                >
+                  <option value="">
+                    {selectedBrand ? 'Modelo…' : 'Elegí marca primero'}
+                  </option>
+                  {modelsForBrand.map((m) => (
+                    <option key={m.slug} value={m.slug}>
+                      {m.model}{m.variant ? ` ${m.variant}` : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {selectedModel && (
+                <div style={{
+                  fontSize: '12px',
+                  color: '#00d084',
+                  background: 'rgba(0,208,132,0.08)',
+                  border: '1px solid rgba(0,208,132,0.25)',
+                  borderRadius: '4px',
+                  padding: '10px 12px',
+                  lineHeight: 1.5,
+                }}>
+                  {selectedModel.rangeRealKm != null ? (
+                    <>Autonomía real: {selectedModel.rangeRealKm} km medidos</>
+                  ) : selectedModel.rangeWltpKm != null ? (
+                    <>Autonomía WLTP (fábrica): {selectedModel.rangeWltpKm} km — todavía sin medir acá</>
+                  ) : (
+                    <>Sin dato de autonomía todavía</>
+                  )}
+                  {selectedModel.batteryKwh != null && (
+                    <> · Batería: {selectedModel.batteryKwh} kWh</>
+                  )}
+                </div>
+              )}
+              {modelsError && (
+                <div style={{ fontSize: '12px', color: '#E8A33D' }}>
+                  No pudimos cargar el catálogo. Completá los datos a mano abajo.
+                </div>
+              )}
+            </div>
+
             <div style={{ marginBottom: '20px' }}>
               <label style={{
                 display: 'block',
@@ -315,17 +466,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                   setTarifaUte(selected);
                   setPrecioKwh(TARIFAS_UTE[selected].value);
                 }}
-                style={{
-                  width: '100%',
-                  background: '#141619',
-                  border: '1px solid #2a2d33',
-                  borderRadius: '4px',
-                  padding: '12px',
-                  color: '#fff',
-                  fontSize: '16px',
-                  fontFamily: 'IBM Plex Sans, sans-serif',
-                  cursor: 'pointer'
-                }}
+                style={selectStyle}
               >
                 <option value="doble">{TARIFAS_UTE.doble.label}</option>
                 <option value="triple">{TARIFAS_UTE.triple.label}</option>
@@ -509,7 +650,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
 
         {/* Right Panel - Results */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          
+
           {/* COSTO POR KM */}
           <div style={{
             background: '#1B1E23',
@@ -661,7 +802,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                 color: '#666',
                 lineHeight: '1.4'
               }}>
-                precio del eléctrico: ${precioElectrico.toLocaleString()} · ${Math.round(precioElectricoUSD).toLocaleString()} USD
+                precio del eléctrico: ${Math.round(precioElectricoUYU).toLocaleString()} · ${precioElectrico.toLocaleString()} USD
               </div>
             </div>
           </div>
@@ -697,7 +838,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
         fontSize: '14px',
         lineHeight: '1.5'
       }}>
-        Precio de nafta: ANCAP/URSEA, julio 2026. Tarifa UTE: horario barato del Plan Inteligente (doble o triple horario) con IVA incluido. Ajustá los valores si tenés otra tarifa o el precio cambió.
+        Precio de nafta: ANCAP/URSEA, julio 2026. Tarifa UTE: horario barato del Plan Inteligente (doble o triple horario) con IVA incluido. Autonomía y consumo eléctrico: catálogo de autoelectrico.uy. Ajustá los valores si tenés otra tarifa o el precio cambió.
       </footer>
     </div>
   );
