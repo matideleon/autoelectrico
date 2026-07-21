@@ -6,6 +6,7 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import * as models from '@/lib/db/models';
+import type { Model } from '@/lib/db/types';
 import {
   modelMetadata,
   vehicleJsonLd,
@@ -30,8 +31,8 @@ const NUMERIC_FIELDS = [
 ];
 
 /** pg devuelve numeric como string y Date como objeto: normalizar. */
-function serialize(m: Record<string, unknown>) {
-  const out: Record<string, unknown> = { ...m };
+function serialize(m: Model) {
+  const out: Record<string, unknown> = { ...m } as Record<string, unknown>;
   for (const f of NUMERIC_FIELDS) {
     if (out[f] != null) out[f] = Number(out[f]);
   }
