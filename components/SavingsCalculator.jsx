@@ -75,7 +75,6 @@ export default function SavingsCalculator() {
   const [precioKwh, setPrecioKwh] = useState(DEFAULTS.precioKwh);
   const [consumoEv, setConsumoEv] = useState(DEFAULTS.consumoEv);
   const [precioEvUsd, setPrecioEvUsd] = useState(DEFAULTS.precioEvUsd);
-  const [precioCombUsd, setPrecioCombUsd] = useState(DEFAULTS.precioCombustionUsd);
   const [tipoCambio, setTipoCambio] = useState(DEFAULTS.tipoCambio);
 
   const calc = useMemo(() => {
@@ -85,8 +84,8 @@ export default function SavingsCalculator() {
     const ahorroMensual = ahorroKm * km;
     const ahorroAnual = ahorroMensual * 12;
 
-    const diferenciaPrecioUyu = (precioEvUsd - precioCombUsd) * tipoCambio;
-    const paybackMeses = ahorroMensual > 0 ? diferenciaPrecioUyu / ahorroMensual : null;
+    const precioEvUyu = precioEvUsd * tipoCambio;
+    const paybackMeses = ahorroMensual > 0 ? precioEvUyu / ahorroMensual : null;
 
     return {
       costoNaftaKm,
@@ -94,10 +93,10 @@ export default function SavingsCalculator() {
       ahorroKm,
       ahorroMensual,
       ahorroAnual,
-      diferenciaPrecioUyu,
+      precioEvUyu,
       paybackMeses,
     };
-  }, [km, precioNafta, consumoNafta, precioKwh, consumoEv, precioEvUsd, precioCombUsd, tipoCambio]);
+  }, [km, precioNafta, consumoNafta, precioKwh, consumoEv, precioEvUsd, tipoCambio]);
 
   const shareText = `Calculé mi ahorro pasándome a un eléctrico en autoelectrico.uy: ${
     calc.ahorroMensual > 0
@@ -150,13 +149,6 @@ export default function SavingsCalculator() {
               onChange={setConsumoNafta}
               unit="L/100km"
               step={0.5}
-            />
-            <Field
-              label="Precio de compra"
-              value={precioCombUsd}
-              onChange={setPrecioCombUsd}
-              unit="USD"
-              step={500}
             />
 
             <h2 style={{ ...S.panelTitle, marginTop: 24 }}>Auto eléctrico</h2>
@@ -242,8 +234,8 @@ export default function SavingsCalculator() {
             </div>
 
             <div style={S.resultCard}>
-              <div style={S.resultLabel}>Recuperás la diferencia de precio en</div>
-              {calc.paybackMeses != null && calc.diferenciaPrecioUyu > 0 ? (
+              <div style={S.resultLabel}>Amortizás el precio del eléctrico en</div>
+              {calc.paybackMeses != null ? (
                 <>
                   <div style={S.bigNumber}>
                     {calc.paybackMeses < 1
@@ -252,18 +244,13 @@ export default function SavingsCalculator() {
                     {calc.paybackMeses >= 1 && <span style={S.bigUnit}> años</span>}
                   </div>
                   <div style={S.subNumber}>
-                    diferencia de compra: ${fmt(calc.diferenciaPrecioUyu)} · $
-                    {fmt(precioEvUsd - precioCombUsd)} USD
+                    precio del eléctrico: ${fmt(calc.precioEvUyu)} · $
+                    {fmt(precioEvUsd)} USD
                   </div>
                 </>
-              ) : calc.diferenciaPrecioUyu <= 0 ? (
-                <div style={S.subNumber}>
-                  El eléctrico no cuesta más que el de combustión con estos
-                  precios: el ahorro empieza el día uno.
-                </div>
               ) : (
                 <div style={S.subNumber}>
-                  Con estos números no se recupera: el combustible del
+                  Con estos números no amortizás: el combustible del
                   eléctrico no sale más barato acá.
                 </div>
               )}
