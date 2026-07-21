@@ -25,6 +25,7 @@ export default function Nav() {
   const links = [
     { href: '/modelos', label: 'Modelos' },
     { href: '/comparar', label: 'Comparar' },
+    { href: '/ahorro', label: 'Ahorro' },
   ];
 
   return (
