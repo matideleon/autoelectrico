@@ -8,7 +8,7 @@ import { query } from '@/lib/db/client';
 import Comparador from '@/components/Comparador';
 import Nav from '@/components/Nav';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Comparar autos eléctricos',

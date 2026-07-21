@@ -10,7 +10,7 @@ import Nav from '@/components/Nav';
 
 const ModelGrid = ModelGridRaw as unknown as (props: { models: Record<string, unknown>[] }) => JSX.Element;
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Modelos eléctricos en Uruguay',
