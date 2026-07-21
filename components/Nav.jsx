@@ -31,7 +31,7 @@ export default function Nav() {
     <>
       <style>{`
         .nav-link { transition: color 140ms ease; }
-        .nav-link:hover { color: ${C.real} !important; }
+        .nav-link:hover { color: ${C.bg} !important; background: ${C.real} !important; border-color: ${C.real} !important; }
         .nav-burger { display: none; }
         @media (max-width: 560px) {
           .nav-links-desktop { display: none !important; }
@@ -97,12 +97,16 @@ const S = {
     textDecoration: 'none',
     letterSpacing: '0.02em',
   },
-  links: { display: 'flex', gap: 22 },
+  links: { display: 'flex', gap: 26, alignItems: 'center' },
   link: {
-    fontSize: 12,
-    color: C.dim,
+    fontSize: 13,
+    fontWeight: 500,
+    color: C.text,
     textDecoration: 'none',
-    letterSpacing: '0.04em',
+    letterSpacing: '0.03em',
+    padding: '6px 12px',
+    borderRadius: 3,
+    border: `1px solid ${C.line}`,
   },
   burger: {
     background: 'none',
