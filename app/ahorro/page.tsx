@@ -77,7 +77,9 @@ export default function AhorroPage() {
     if (selectedModel.consumptionKwh100 != null) {
       setConsumoElectrico(selectedModel.consumptionKwh100);
     }
-    setPrecioElectrico(0);
+    // Si el modelo tiene precio real cargado, se autocompleta.
+    // Si no, se vacía para no dejar pegado el precio del auto anterior.
+    setPrecioElectrico(selectedModel.priceUsd ?? 0);
   }, [selectedModel]);
 
   // Calculations
@@ -454,10 +456,12 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                       quedó en el valor anterior, completalo vos.
                     </div>
                   )}
-                  <div style={{ color: '#8A9099', marginTop: 6 }}>
-                    El precio no se autocompleta: ingresalo vos abajo para
-                    calcular la amortización.
-                  </div>
+                  {selectedModel.priceUsd == null && (
+                    <div style={{ color: '#8A9099', marginTop: 6 }}>
+                      No tenemos precio verificado para este modelo todavía:
+                      ingresalo vos abajo para calcular la amortización.
+                    </div>
+                  )}
                 </div>
               )}
               {modelsError && (
