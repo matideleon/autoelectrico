@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import SavingsChart from '@/components/SavingsChart';
 
 interface ModelOption {
   slug: string;
@@ -818,6 +819,12 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
               </div>
             </div>
           </div>
+
+          <SavingsChart
+            monthlySavings={ahorroMensual}
+            priceUYU={precioElectricoUYU}
+            amortizacionMeses={amortizacionMeses}
+          />
 
           {/* Share Button */}
           <button
