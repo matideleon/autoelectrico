@@ -29,6 +29,9 @@ const C = {
   gap: '#4A505A',
 };
 
+const mono = "'IBM Plex Mono', ui-monospace, Menlo, monospace";
+const sans = "'IBM Plex Sans', -apple-system, sans-serif";
+
 const fmt = (n) => (n == null ? null : new Intl.NumberFormat('es-UY').format(n));
 
 /* Filas de comparación. `better` define qué dirección gana.
@@ -396,9 +399,6 @@ const mobileStyles = {
   tagReal: { display: 'block', fontSize: 9, color: C.real, marginTop: 2, letterSpacing: '0.04em', textTransform: 'none' },
   legend: { display: 'flex', gap: 16, flexWrap: 'wrap', fontFamily: mono, fontSize: 10, color: C.faint, paddingTop: 12, borderTop: `1px solid ${C.line}` },
 };
-
-const mono = "'IBM Plex Mono', ui-monospace, Menlo, monospace";
-const sans = "'IBM Plex Sans', -apple-system, sans-serif";
 
 const CSS = `
   * { box-sizing: border-box; }
