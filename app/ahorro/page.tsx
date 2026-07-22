@@ -74,9 +74,10 @@ export default function AhorroPage() {
     if (selectedModel.consumptionKwh100 != null) {
       setConsumoElectrico(selectedModel.consumptionKwh100);
     }
-    if (selectedModel.priceUsd != null) {
-      setPrecioElectrico(selectedModel.priceUsd);
-    }
+    // Si el modelo no tiene precio propio, se vacía el campo en vez
+    // de dejar el número del modelo anterior: un valor viejo ahí
+    // parece el precio de ESTE auto y no lo es.
+    setPrecioElectrico(selectedModel.priceUsd ?? 0);
   }, [selectedModel]);
 
   // Calculations
@@ -91,7 +92,8 @@ export default function AhorroPage() {
   // USD por UYU/mes daba un resultado sin sentido (meses en vez de
   // años). Este era un bug real: mezclaba monedas.
   const precioElectricoUYU = precioElectrico * tipoCambio;
-  const amortizacionMeses = ahorroMensual > 0 ? precioElectricoUYU / ahorroMensual : null;
+  const amortizacionMeses =
+    ahorroMensual > 0 && precioElectrico > 0 ? precioElectricoUYU / ahorroMensual : null;
   const amortizacionAnios = amortizacionMeses != null ? amortizacionMeses / 12 : null;
 
   const handleShare = () => {
@@ -438,6 +440,15 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                   {selectedModel.batteryKwh != null && (
                     <> · Batería: {selectedModel.batteryKwh} kWh</>
                   )}
+                  {(selectedModel.priceUsd == null || selectedModel.consumptionKwh100 == null) && (
+                    <div style={{ color: '#E8A33D', marginTop: 6 }}>
+                      {selectedModel.priceUsd == null && selectedModel.consumptionKwh100 == null
+                        ? 'Sin precio ni consumo verificados todavía: completalos vos abajo.'
+                        : selectedModel.priceUsd == null
+                        ? 'Sin precio verificado todavía: el campo de abajo quedó en el valor anterior, completalo vos.'
+                        : 'Sin consumo verificado todavía: el campo de abajo quedó en el valor anterior, completalo vos.'}
+                    </div>
+                  )}
                 </div>
               )}
               {modelsError && (
@@ -563,8 +574,9 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
               <div style={{ position: 'relative' }}>
                 <input
                   type="number"
-                  value={precioElectrico}
-                  onChange={(e) => setPrecioElectrico(Number(e.target.value))}
+                  value={precioElectrico === 0 ? '' : precioElectrico}
+                  onChange={(e) => setPrecioElectrico(Number(e.target.value) || 0)}
+                  placeholder="Ingresá el precio"
                   style={{
                     width: '100%',
                     background: '#141619',
@@ -795,7 +807,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                 color: '#666',
                 marginBottom: '16px'
               }}>
-                {amortizacionAnios != null ? 'años' : 'sin ahorro mensual'}
+                {amortizacionAnios != null ? 'años' : precioElectrico <= 0 ? 'completá el precio arriba' : 'sin ahorro mensual'}
               </div>
               <div style={{
                 fontSize: '12px',
