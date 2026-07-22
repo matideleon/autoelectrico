@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import ChatWidget from '@/components/ChatWidget';
 
 export const metadata: Metadata = {
   title: {
@@ -34,7 +35,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body style={{ margin: 0, background: '#141619' }}>{children}</body>
+      <body style={{ margin: 0, background: '#141619' }}>
+        {children}
+        <ChatWidget />
+      </body>
     </html>
   );
 }
