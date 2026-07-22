@@ -12,6 +12,7 @@
 
 import type { Metadata } from 'next';
 import Nav from '@/components/Nav';
+import NewsletterSignup from '@/components/NewsletterSignup';
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://autoelectrico.uy';
 
@@ -228,6 +229,8 @@ export default function TeslaImpactoArticle() {
               </a>
             </div>
           </section>
+
+          <NewsletterSignup />
 
           <footer style={S.sources}>
             <div style={S.sourcesTitle}>Fuentes</div>
