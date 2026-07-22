@@ -54,7 +54,7 @@ export default function Nav() {
           </span>
         </a>
 
-        <div className="nav-links-desktop" style={S.links}>
+        <div className="nav-links-desktop" style={S.linksBox}>
           {links.map((l) => (
             <a key={l.href} href={l.href} className="nav-link" style={S.link}>
               {l.label}
@@ -62,6 +62,9 @@ export default function Nav() {
           ))}
         </div>
 
+        {/* La columna derecha (1fr) reserva su espacio sola, aunque
+            el botón esté display:none en desktop — así la caja de
+            links del medio queda centrada de verdad en los dos casos. */}
         <button
           className="nav-burger"
           style={S.burger}
@@ -91,10 +94,11 @@ const S = {
     position: 'sticky',
     top: 0,
     zIndex: 100,
-    display: 'flex',
-    justifyContent: 'space-between',
+    display: 'grid',
+    gridTemplateColumns: '1fr auto 1fr',
     alignItems: 'center',
-    padding: '14px 20px',
+    gap: 12,
+    padding: '12px 20px',
     background: 'rgba(20,22,25,0.92)',
     backdropFilter: 'blur(8px)',
     borderBottom: `1px solid ${C.line}`,
@@ -115,18 +119,27 @@ const S = {
     color: C.text,
     letterSpacing: '0.02em',
   },
-  links: { display: 'flex', gap: 26, alignItems: 'center' },
+  linksBox: {
+    display: 'flex',
+    gap: 4,
+    alignItems: 'center',
+    background: C.surface,
+    border: `1px solid ${C.line}`,
+    borderRadius: 8,
+    padding: 5,
+  },
   link: {
     fontSize: 13,
     fontWeight: 500,
     color: C.text,
     textDecoration: 'none',
     letterSpacing: '0.03em',
-    padding: '6px 12px',
-    borderRadius: 3,
-    border: `1px solid ${C.line}`,
+    padding: '6px 14px',
+    borderRadius: 5,
+    border: '1px solid transparent',
   },
   burger: {
+    justifySelf: 'end',
     background: 'none',
     border: 'none',
     color: C.text,
