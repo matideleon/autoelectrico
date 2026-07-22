@@ -28,7 +28,6 @@ const sans = "'IBM Plex Sans', -apple-system, sans-serif";
 const fmt = (n) => (n == null ? null : new Intl.NumberFormat('es-UY').format(Number(n)));
 
 function ModelCard({ m }) {
-  const price = m.price_usd != null ? Number(m.price_usd) : null;
   const real = m.range_real_km != null ? Number(m.range_real_km) : null;
   const wltp = m.range_wltp_km != null ? Number(m.range_wltp_km) : null;
 
@@ -46,13 +45,7 @@ function ModelCard({ m }) {
       </div>
 
       <div style={S.price}>
-        {price != null ? (
-          <>
-            <em style={S.currency}>USD</em> {fmt(price)}
-          </>
-        ) : (
-          <span style={S.noPrice}>precio sin confirmar</span>
-        )}
+        <span style={S.noPrice}>consultá el precio</span>
       </div>
 
       <div style={S.ranges}>

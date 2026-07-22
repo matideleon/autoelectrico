@@ -96,7 +96,8 @@ const fmt = (n) => (n == null ? null : new Intl.NumberFormat('es-UY').format(n))
    `source` marca de dónde viene el dato: eso decide si se puede
    comparar o no. */
 const ROWS = [
-  { key: 'price_usd', label: 'Precio', unit: 'USD', better: 'lower', source: 'quoted', prefix: true },
+  // Precio deliberadamente afuera: nunca se muestra un número de
+  // precio en el sitio. Consultar siempre al importador.
   { key: 'range_real_km', label: 'Autonomía real', unit: 'km', better: 'higher', source: 'measured' },
   { key: 'range_wltp_km', label: 'Autonomía WLTP', unit: 'km', better: 'higher', source: 'lab' },
   { key: 'battery_kwh', label: 'Batería', unit: 'kWh', better: 'higher', source: 'spec' },
@@ -205,7 +206,9 @@ export default function Comparador({ models: dbModels }) {
           <h1 style={S.h1}>Poné los números lado a lado</h1>
           <p style={S.lede}>
             Hasta tres modelos. Cuando falta un dato lo decimos: comparar
-            contra un hueco sería hacerle perder a quien todavía no midió.
+            contra un hueco sería hacerle perder a quien todavía no midió. El
+            precio no se muestra acá — varía por versión y promoción,
+            consultalo directo con el importador.
           </p>
         </header>
 

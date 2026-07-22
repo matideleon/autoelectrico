@@ -26,8 +26,6 @@ export function modelDescription(m: Partial<Model>): string {
 
   const bits: string[] = [`${m.brand} ${m.model} en Uruguay.`];
 
-  if (m.price_usd) bits.push(`Precio desde USD ${m.price_usd.toLocaleString('es-UY')}.`);
-
   // La autonomía real es el gancho: nadie más la publica.
   if (m.range_real_km) {
     bits.push(`Autonomía real medida: ${m.range_real_km} km.`);
@@ -97,24 +95,10 @@ export function vehicleJsonLd(m: Partial<Model>): Record<string, unknown> {
   if (m.seats) ld.seatingCapacity = m.seats;
   if (m.drivetrain) ld.driveWheelConfiguration = m.drivetrain.toUpperCase();
 
-  // Precio: solo si existe Y tiene fuente. Sin fuente no se publica.
-  if (m.price_usd != null && m.price_source) {
-    ld.offers = {
-      '@type': 'Offer',
-      price: m.price_usd,
-      priceCurrency: 'USD',
-      availability: m.available_uy
-        ? 'https://schema.org/InStock'
-        : 'https://schema.org/OutOfStock',
-      areaServed: { '@type': 'Country', name: 'Uruguay' },
-      seller: m.importer ? { '@type': 'Organization', name: m.importer } : undefined,
-      priceValidUntil: m.price_updated_at
-        ? new Date(
-            new Date(m.price_updated_at).getTime() + 90 * 864e5
-          ).toISOString().slice(0, 10)
-        : undefined,
-    };
-  }
+  // Decisión: el sitio nunca muestra precios (ni en pantalla ni en
+  // datos estructurados). Google podría renderizar el precio en el
+  // resultado de búsqueda si lo dejáramos acá, así que no se emite
+  // Offer aunque haya price_usd cargado en la base.
 
   if (m.battery_kwh) {
     ld.batteryCapacity = {
@@ -180,17 +164,12 @@ export function vehicleJsonLd(m: Partial<Model>): Record<string, unknown> {
 export function faqJsonLd(m: Partial<Model>): Record<string, unknown> | null {
   const qa: Array<{ q: string; a: string }> = [];
 
-  if (m.price_usd && m.price_source) {
-    const when = m.price_updated_at
-      ? new Date(m.price_updated_at).toLocaleDateString('es-UY')
-      : null;
-    qa.push({
-      q: `¿Cuánto sale el ${m.brand} ${m.model} en Uruguay?`,
-      a: `El ${m.brand} ${m.model} arranca en USD ${m.price_usd.toLocaleString('es-UY')}${
-        m.importer ? ` según ${m.importer}` : ''
-      }${when ? `, precio actualizado el ${when}` : ''}. Los precios varían según versión y equipamiento.`,
-    });
-  }
+  qa.push({
+    q: `¿Cuánto sale el ${m.brand} ${m.model} en Uruguay?`,
+    a: `El precio varía según versión, equipamiento y promoción vigente${
+      m.importer ? `. Te recomendamos consultarlo directo con ${m.importer}` : '. Te recomendamos consultarlo directo con el importador'
+    }.`,
+  });
 
   if (m.range_real_km) {
     qa.push({

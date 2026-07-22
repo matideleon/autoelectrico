@@ -228,29 +228,16 @@ function Spec({ label, value, unit, tone = 'real', note }) {
 }
 
 /* ---------- Precio ---------- */
-function PriceBlock({ price, source, updated }) {
-  if (price == null) {
-    return (
-      <div style={{ ...S.price, borderColor: C.gap }}>
-        <div style={S.priceLabel}>Precio en Uruguay</div>
-        <div style={{ ...S.priceValue, color: C.gap, fontSize: 26 }}>
-          sin confirmar
-        </div>
-        <div style={S.priceFoot}>
-          No publicamos precios que no podamos citar.
-        </div>
-      </div>
-    );
-  }
+function PriceBlock() {
   return (
-    <div style={S.price}>
+    <div style={{ ...S.price, borderColor: C.line }}>
       <div style={S.priceLabel}>Precio en Uruguay</div>
-      <div style={S.priceValue}>
-        <em style={S.currency}>USD</em> {fmt(price)}
+      <div style={{ ...S.priceValue, color: C.dim, fontSize: 22 }}>
+        Consultá con el importador
       </div>
       <div style={S.priceFoot}>
-        {source ?? 'sin fuente declarada'}
-        {updated ? ` · actualizado ${new Date(updated).toLocaleDateString('es-UY')}` : ' · sin fecha de actualización'}
+        El precio varía por versión y promoción vigente. Preguntale al bot de
+        acá abajo o contactá directo al concesionario.
       </div>
     </div>
   );
@@ -342,11 +329,7 @@ export default function ModelSheet({ model }) {
           <p style={S.summary}>{m.summary}</p>
         </header>
 
-        <PriceBlock
-          price={m.price_usd}
-          source={m.price_source}
-          updated={m.price_updated_at}
-        />
+        <PriceBlock />
 
         {/* Signature */}
         <section style={S.section}>

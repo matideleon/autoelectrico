@@ -27,7 +27,7 @@ export default function AhorroPage() {
   const [tarifaUte, setTarifaUte] = useState<'doble' | 'triple'>('doble');
   const [precioKwh, setPrecioKwh] = useState(TARIFAS_UTE.doble.value);
   const [consumoElectrico, setConsumoElectrico] = useState(15.6);
-  const [precioElectrico, setPrecioElectrico] = useState(32900);
+  const [precioElectrico, setPrecioElectrico] = useState(0);
   const [tipoCambio, setTipoCambio] = useState(40.5);
 
   // --- Selector de vehículo: datos reales de nuestra base ---
@@ -66,18 +66,17 @@ export default function AhorroPage() {
     [models, selectedSlug]
   );
 
-  // Al elegir un modelo, autocompleta consumo y precio con datos reales.
-  // La persona igual puede editarlos después: esto es un punto de
-  // partida, no una imposición.
+  // Al elegir un modelo, autocompleta el consumo (dato técnico, sí lo
+  // tenemos con fuente). El precio NUNCA se autocompleta: varía por
+  // versión y promoción, y el sitio no muestra precios en ningún lado.
+  // Al cambiar de modelo se vacía para que no quede el número del
+  // auto anterior pegado, pareciendo el precio de este.
   useEffect(() => {
     if (!selectedModel) return;
     if (selectedModel.consumptionKwh100 != null) {
       setConsumoElectrico(selectedModel.consumptionKwh100);
     }
-    // Si el modelo no tiene precio propio, se vacía el campo en vez
-    // de dejar el número del modelo anterior: un valor viejo ahí
-    // parece el precio de ESTE auto y no lo es.
-    setPrecioElectrico(selectedModel.priceUsd ?? 0);
+    setPrecioElectrico(0);
   }, [selectedModel]);
 
   // Calculations
@@ -440,15 +439,16 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                   {selectedModel.batteryKwh != null && (
                     <> · Batería: {selectedModel.batteryKwh} kWh</>
                   )}
-                  {(selectedModel.priceUsd == null || selectedModel.consumptionKwh100 == null) && (
+                  {selectedModel.consumptionKwh100 == null && (
                     <div style={{ color: '#E8A33D', marginTop: 6 }}>
-                      {selectedModel.priceUsd == null && selectedModel.consumptionKwh100 == null
-                        ? 'Sin precio ni consumo verificados todavía: completalos vos abajo.'
-                        : selectedModel.priceUsd == null
-                        ? 'Sin precio verificado todavía: el campo de abajo quedó en el valor anterior, completalo vos.'
-                        : 'Sin consumo verificado todavía: el campo de abajo quedó en el valor anterior, completalo vos.'}
+                      Sin consumo verificado todavía: el campo de abajo
+                      quedó en el valor anterior, completalo vos.
                     </div>
                   )}
+                  <div style={{ color: '#8A9099', marginTop: 6 }}>
+                    El precio no se autocompleta: ingresalo vos abajo para
+                    calcular la amortización.
+                  </div>
                 </div>
               )}
               {modelsError && (
