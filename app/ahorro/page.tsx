@@ -132,6 +132,14 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
       color: '#fff',
       fontFamily: 'IBM Plex Sans, sans-serif'
     }}>
+      <style>{`
+        @media (max-width: 860px) {
+          .ahorro-main-grid { grid-template-columns: 1fr !important; }
+        }
+        @media (max-width: 420px) {
+          .ahorro-vehicle-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
       {/* Navigation */}
       <nav style={{
         display: 'flex',
@@ -191,7 +199,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
       </header>
 
       {/* Main Content */}
-      <div style={{
+      <div className="ahorro-main-grid" style={{
         display: 'grid',
         gridTemplateColumns: '1fr 400px',
         gap: '40px',
@@ -390,7 +398,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>
                 Autocompleta consumo y precio. Podés editarlos después.
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '8px' }}>
+              <div className="ahorro-vehicle-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '8px' }}>
                 <select
                   value={selectedBrand}
                   onChange={(e) => {
