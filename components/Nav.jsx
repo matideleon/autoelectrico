@@ -97,7 +97,7 @@ const S = {
     display: 'grid',
     gridTemplateColumns: '1fr auto 1fr',
     alignItems: 'center',
-    gap: 12,
+    gap: 24,
     padding: '12px 20px',
     background: 'rgba(20,22,25,0.92)',
     backdropFilter: 'blur(8px)',

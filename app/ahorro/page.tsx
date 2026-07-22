@@ -201,7 +201,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
       {/* Main Content */}
       <div className="ahorro-main-grid" style={{
         display: 'grid',
-        gridTemplateColumns: '1fr 400px',
+        gridTemplateColumns: '3fr 2fr',
         gap: '40px',
         maxWidth: '1200px',
         margin: '0 auto',
