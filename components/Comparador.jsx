@@ -67,7 +67,7 @@ function winnerOf(row, list) {
   return list.findIndex((m) => m[row.key] === best);
 }
 
-function Cell({ row, m, isWinner, incomparable }) {
+function Cell({ row, m, isWinner, incomparable, styles }) {
   const v = m[row.key];
   if (v == null) {
     return (
@@ -248,7 +248,7 @@ export default function Comparador({ models: dbModels }) {
                         {row.source === 'measured' && (<span style={styles.tagReal}>medido acá</span>)}
                       </th>
                       {list.map((m, i) => (
-                        <Cell key={m.slug} row={row} m={m} isWinner={w === i}
+                        <Cell key={m.slug} row={row} m={m} isWinner={w === i} styles={styles}
                           incomparable={hasGap && row.better !== 'none' && m[row.key] != null}
                         />
                       ))}
