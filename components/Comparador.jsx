@@ -382,7 +382,7 @@ const mobileStyles = {
   caption: { position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' },
   srOnly: { position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' },
   th: { textAlign: 'left', padding: '0 8px 8px', borderBottom: `1px solid ${C.line}`, verticalAlign: 'bottom' },
-  thFirst: { width: '30%', minWidth', minWidth: 100 ) },
+  thFirst: { width: '30%', minWidth: 100 },
   thBrand: { fontFamily: mono, fontSize: 10, color: C.faint, letterSpacing: '0.06em' },
   thModel: { fontSize: 14, fontWeight: 600, letterSpacing: '-0.01em', marginTop: 1 },
   rowLabel: { fontFamily: mono, fontSize: 10, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'left', fontWeight: 400, padding: '8px 8px', borderBottom: `1px solid ${C.line}`, verticalAlign: 'middle' },
