@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import HeroInstrument from './HeroInstrument';
 
 /* ============================================================
    evuy — Landing de captura
@@ -194,6 +195,11 @@ export default function Landing() {
             <br />
             <span style={S.h1Accent}>no es la que vas a tener.</span>
           </h1>
+
+          <div style={{ margin: '8px 0 32px' }}>
+            <HeroInstrument />
+          </div>
+
           <p style={S.lede}>
             Los números de fábrica salen de un laboratorio. Nosotros publicamos
             los dos: el declarado y el real, medido por gente que maneja el auto
@@ -386,11 +392,13 @@ const S = {
     marginBottom: 18,
   },
   h1: {
-    fontSize: 'clamp(28px, 6.5vw, 42px)',
-    fontWeight: 600,
-    letterSpacing: '-0.025em',
-    lineHeight: 1.12,
-    margin: '0 0 18px',
+    fontFamily: "'Instrument Serif', Georgia, serif",
+    fontStyle: 'italic',
+    fontWeight: 400,
+    fontSize: 'clamp(32px, 7.5vw, 52px)',
+    letterSpacing: '-0.01em',
+    lineHeight: 1.1,
+    margin: '0 0 28px',
   },
   h1Accent: { color: C.real },
   lede: {
