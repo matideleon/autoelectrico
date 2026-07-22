@@ -41,8 +41,17 @@ export default function Nav() {
       `}</style>
 
       <nav style={S.nav}>
-        <a href="/" style={S.logo}>
-          autoelectrico<span style={{ color: C.real }}>.uy</span>
+        <a href="/" style={S.logoLink}>
+          <img
+            src="/logo-icon.png"
+            alt="autoelectrico.uy"
+            style={S.logoImg}
+            width={32}
+            height={25}
+          />
+          <span style={S.logoText}>
+            autoelectrico<span style={{ color: C.real }}>.uy</span>
+          </span>
         </a>
 
         <div className="nav-links-desktop" style={S.links}>
@@ -91,11 +100,19 @@ const S = {
     borderBottom: `1px solid ${C.line}`,
     fontFamily: mono,
   },
-  logo: {
+  logoLink: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 9,
+    textDecoration: 'none',
+  },
+  logoImg: {
+    display: 'block',
+  },
+  logoText: {
     fontSize: 14,
     fontWeight: 500,
     color: C.text,
-    textDecoration: 'none',
     letterSpacing: '0.02em',
   },
   links: { display: 'flex', gap: 26, alignItems: 'center' },
