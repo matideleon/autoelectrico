@@ -37,7 +37,7 @@ const C = {
 const mono = "'IBM Plex Mono', ui-monospace, Menlo, monospace";
 const sans = "'IBM Plex Sans', -apple-system, sans-serif";
 
-const MAX_MODELS = 5;
+const MAX_MODELS = 4;
 
 const fmt = (n) => (n == null ? null : new Intl.NumberFormat('es-UY').format(n));
 
@@ -96,6 +96,105 @@ function Cell({ row, m, isWinner, incomparable, styles }) {
   );
 }
 
+/**
+ * Un slot de selección con buscador propio, en vez del <select>
+ * nativo del navegador — ese sale blanco y con la tipografía del
+ * sistema al abrirse, rompiendo el tema oscuro del sitio.
+ */
+function SlotCombobox({ index, value, options, excludeSlugs, onChange, styles }) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const boxRef = useRef(null);
+
+  const selected = options.find((m) => m.slug === value) ?? null;
+
+  useEffect(() => {
+    const onClickOutside = (e) => {
+      if (boxRef.current && !boxRef.current.contains(e.target)) {
+        setOpen(false);
+        setQuery('');
+      }
+    };
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, []);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return options.filter((m) => {
+      if (excludeSlugs.includes(m.slug)) return false;
+      if (!q) return true;
+      return `${m.brand} ${m.model} ${m.variant ?? ''}`.toLowerCase().includes(q);
+    });
+  }, [options, excludeSlugs, query]);
+
+  const pick = (slug) => {
+    onChange(slug);
+    setOpen(false);
+    setQuery('');
+  };
+
+  return (
+    <div style={styles.slotGroup} ref={boxRef}>
+      <label style={styles.slotLabel}>Auto {index + 1}</label>
+      <div style={styles.comboWrap}>
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          style={styles.comboTrigger}
+          className="combo-trigger"
+        >
+          <span style={selected ? styles.comboValue : styles.comboPlaceholder}>
+            {selected ? `${selected.brand} ${selected.model}${selected.variant ? ` ${selected.variant}` : ''}` : 'Buscar vehículo…'}
+          </span>
+          <span style={styles.comboChevron}>{open ? '▲' : '▼'}</span>
+        </button>
+
+        {selected && !open && (
+          <button
+            type="button"
+            onClick={() => onChange('')}
+            style={styles.comboClear}
+            aria-label="Sacar este auto"
+            title="Sacar este auto"
+          >
+            ×
+          </button>
+        )}
+
+        {open && (
+          <div style={styles.comboPanel}>
+            <input
+              autoFocus
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Buscar para filtrar el listado"
+              style={styles.comboSearch}
+            />
+            <div style={styles.comboList}>
+              {filtered.length === 0 && (
+                <div style={styles.comboNoResults}>Sin resultados</div>
+              )}
+              {filtered.map((m) => (
+                <button
+                  key={m.slug}
+                  type="button"
+                  onClick={() => pick(m.slug)}
+                  style={styles.comboOption}
+                  className="combo-option"
+                >
+                  {m.brand} {m.model}{m.variant ? ` ${m.variant}` : ''}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function Comparador({ models: dbModels }) {
   const [width, setWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
   useEffect(() => {
@@ -119,10 +218,17 @@ export default function Comparador({ models: dbModels }) {
     });
   }, [dbModels]);
 
-  const [picked, setPicked] = useState([]);
-  const [query, setQuery] = useState('');
-  const [focused, setFocused] = useState(false);
-  const boxRef = useRef(null);
+  // Lista alfabética completa: "Marca Modelo", una sola vez, para
+  // los 4 selects. Se ordena por marca+modelo juntos, como pidió
+  // verlo el usuario.
+  const alphabetical = useMemo(() => {
+    return [...MODELS_LIVE].sort((a, b) =>
+      `${a.brand} ${a.model}`.localeCompare(`${b.brand} ${b.model}`, 'es')
+    );
+  }, [MODELS_LIVE]);
+
+  // 4 slots fijos: cada uno guarda el slug elegido, o '' si está vacío.
+  const [slots, setSlots] = useState(['', '', '', '']);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !MODELS_LIVE.length) return;
@@ -130,38 +236,25 @@ export default function Comparador({ models: dbModels }) {
     const ids = params.get('ids');
     if (!ids) return;
     const slugs = ids.split(',').filter((s) => MODELS_LIVE.some((m) => m.slug === s));
-    if (slugs.length) setPicked(slugs.slice(0, MAX_MODELS));
+    if (slugs.length) {
+      const next = ['', '', '', ''];
+      slugs.slice(0, MAX_MODELS).forEach((s, i) => { next[i] = s; });
+      setSlots(next);
+    }
   }, [MODELS_LIVE]);
 
-  useEffect(() => {
-    const onClick = (e) => {
-      if (boxRef.current && !boxRef.current.contains(e.target)) setFocused(false);
-    };
-    document.addEventListener('mousedown', onClick);
-    return () => document.removeEventListener('mousedown', onClick);
-  }, []);
-
-  const results = useMemo(() => {
-    if (!query.trim()) return [];
-    const q = query.trim().toLowerCase();
-    return MODELS_LIVE
-      .filter((m) => !picked.includes(m.slug))
-      .filter((m) => `${m.brand} ${m.model} ${m.variant ?? ''}`.toLowerCase().includes(q))
-      .slice(0, 8);
-  }, [query, MODELS_LIVE, picked]);
-
-  const addModel = (slug) => {
-    setPicked((p) => {
-      if (p.includes(slug) || p.length >= MAX_MODELS) return p;
-      return [...p, slug];
+  const setSlot = (index, slug) => {
+    setSlots((prev) => {
+      const next = [...prev];
+      next[index] = slug;
+      return next;
     });
-    setQuery('');
   };
 
-  const removeModel = (slug) => setPicked((p) => p.filter((s) => s !== slug));
-  const clearAll = () => setPicked([]);
+  const clearAll = () => setSlots(['', '', '', '']);
 
-  const list = MODELS_LIVE.filter((m) => picked.includes(m.slug));
+  const picked = slots.filter(Boolean);
+  const list = slots.map((slug) => MODELS_LIVE.find((m) => m.slug === slug)).filter(Boolean);
 
   const [shareLabel, setShareLabel] = useState('Compartir');
   const share = async () => {
@@ -202,40 +295,18 @@ export default function Comparador({ models: dbModels }) {
           </div>
         </header>
 
-        <div style={styles.searchBox} ref={boxRef}>
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onFocus={() => setFocused(true)}
-            placeholder={
-              picked.length >= MAX_MODELS
-                ? `Ya elegiste ${MAX_MODELS} modelos — sacá uno para agregar otro`
-                : 'Buscá por marca o modelo (ej: BYD, EX5, Model 3)'
-            }
-            disabled={picked.length >= MAX_MODELS}
-            style={{ ...styles.searchInput, opacity: picked.length >= MAX_MODELS ? 0.5 : 1 }}
-          />
-          {focused && results.length > 0 && (
-            <div style={styles.searchResults}>
-              {results.map((m) => (
-                <button
-                  key={m.slug}
-                  onClick={() => addModel(m.slug)}
-                  style={styles.searchResultItem}
-                  className="search-result-item"
-                >
-                  <span style={styles.searchResultBrand}>{m.brand}</span>{' '}
-                  {m.model}{m.variant ? ` ${m.variant}` : ''}
-                </button>
-              ))}
-            </div>
-          )}
-          {focused && query.trim() && results.length === 0 && (
-            <div style={styles.searchResults}>
-              <div style={styles.searchNoResults}>Sin resultados para "{query}"</div>
-            </div>
-          )}
+        <div style={styles.slotsGrid}>
+          {slots.map((slug, i) => (
+            <SlotCombobox
+              key={i}
+              index={i}
+              value={slug}
+              options={alphabetical}
+              excludeSlugs={slots.filter((s, si) => si !== i && s)}
+              onChange={(newSlug) => setSlot(i, newSlug)}
+              styles={styles}
+            />
+          ))}
         </div>
 
         <div style={styles.countRow}>
@@ -253,26 +324,6 @@ export default function Comparador({ models: dbModels }) {
             )}
           </div>
         </div>
-
-        {picked.length > 0 && (
-          <div style={styles.chips}>
-            {picked.map((slug) => {
-              const m = MODELS_LIVE.find((x) => x.slug === slug);
-              if (!m) return null;
-              return (
-                <button
-                  key={slug}
-                  onClick={() => removeModel(slug)}
-                  style={styles.chip}
-                  className="chip-btn"
-                >
-                  {m.brand} {m.model}
-                  <span style={styles.chipX}> ×</span>
-                </button>
-              );
-            })}
-          </div>
-        )}
 
         {list.length > 0 && (
           <div style={styles.scroll}>
@@ -354,24 +405,43 @@ const baseStyles = {
     border: `1px solid ${C.line}`, borderRadius: 20, padding: '6px 13px',
     letterSpacing: '0.02em',
   },
-  searchBox: { position: 'relative', marginBottom: 12 },
-  searchInput: {
-    width: '100%', fontFamily: mono, fontSize: 14, padding: '13px 16px',
+  slotsGrid: {
+    display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginBottom: 16,
+  },
+  slotGroup: { display: 'flex', flexDirection: 'column', gap: 6, position: 'relative' },
+  slotLabel: { fontFamily: mono, fontSize: 10.5, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.06em' },
+  comboWrap: { position: 'relative' },
+  comboTrigger: {
+    width: '100%', fontFamily: sans, fontSize: 13.5, padding: '11px 34px 11px 13px',
     background: C.surface, color: C.text, border: `1px solid ${C.line}`,
-    borderRadius: 5, outline: 'none', boxSizing: 'border-box',
+    borderRadius: 4, cursor: 'pointer', boxSizing: 'border-box', textAlign: 'left',
+    display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8,
   },
-  searchResults: {
-    position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, zIndex: 20,
+  comboValue: { color: C.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  comboPlaceholder: { color: C.faint, fontFamily: mono, fontSize: 12.5 },
+  comboChevron: { color: C.faint, fontSize: 9, flexShrink: 0 },
+  comboClear: {
+    position: 'absolute', right: 30, top: '50%', transform: 'translateY(-50%)',
+    background: 'transparent', border: 'none', color: C.faint, fontSize: 16,
+    cursor: 'pointer', padding: '2px 4px', lineHeight: 1,
+  },
+  comboPanel: {
+    position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, zIndex: 30,
     background: C.surface, border: `1px solid ${C.line}`, borderRadius: 5,
-    overflow: 'hidden', boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+    boxShadow: '0 12px 28px rgba(0,0,0,0.5)', overflow: 'hidden',
   },
-  searchResultItem: {
+  comboSearch: {
+    width: '100%', fontFamily: mono, fontSize: 12.5, padding: '10px 13px',
+    background: C.bg, color: C.text, border: 'none',
+    borderBottom: `1px solid ${C.line}`, outline: 'none', boxSizing: 'border-box',
+  },
+  comboList: { maxHeight: 260, overflowY: 'auto' },
+  comboOption: {
     display: 'block', width: '100%', textAlign: 'left', fontFamily: sans,
-    fontSize: 14, color: C.text, background: 'transparent', border: 'none',
-    borderBottom: `1px solid ${C.line}`, padding: '11px 16px', cursor: 'pointer',
+    fontSize: 13, color: C.text, background: 'transparent', border: 'none',
+    borderBottom: `1px solid ${C.line}`, padding: '10px 13px', cursor: 'pointer',
   },
-  searchResultBrand: { fontFamily: mono, fontSize: 11, color: C.dim },
-  searchNoResults: { fontFamily: mono, fontSize: 12, color: C.faint, padding: '14px 16px' },
+  comboNoResults: { fontFamily: mono, fontSize: 11.5, color: C.faint, padding: '14px 13px' },
   countRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexWrap: 'wrap', gap: 8 },
   countText: { fontFamily: mono, fontSize: 11.5, color: C.dim },
   countActions: { display: 'flex', gap: 16 },
@@ -380,22 +450,6 @@ const baseStyles = {
     border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline',
     textUnderlineOffset: 3,
   },
-  chips: { display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 },
-  chip: {
-    fontFamily: mono,
-    fontSize: 12,
-    padding: '7px 12px',
-    background: 'rgba(61,220,151,0.08)',
-    color: C.real,
-    border: `1px solid ${C.real}`,
-    borderRadius: 2,
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    gap: 4,
-    transition: 'all 140ms ease',
-  },
-  chipX: { color: C.faint, fontSize: 14 },
   empty: { background: C.surface, border: `1px solid ${C.line}`, borderRadius: 4, padding: '40px 20px', textAlign: 'center', marginBottom: 26 },
   emptyText: { color: C.dim, fontSize: 14, margin: 0 },
   scroll: { overflowX: 'auto', marginBottom: 20 },
@@ -431,24 +485,43 @@ const mobileStyles = {
     fontFamily: mono, fontSize: 9.5, color: C.dim, background: C.surface,
     border: `1px solid ${C.line}`, borderRadius: 20, padding: '5px 11px',
   },
-  searchBox: { position: 'relative', marginBottom: 10 },
-  searchInput: {
-    width: '100%', fontFamily: mono, fontSize: 13, padding: '11px 13px',
+  slotsGrid: {
+    display: 'grid', gridTemplateColumns: '1fr', gap: 10, marginBottom: 12,
+  },
+  slotGroup: { display: 'flex', flexDirection: 'column', gap: 4, position: 'relative' },
+  slotLabel: { fontFamily: mono, fontSize: 9.5, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.06em' },
+  comboWrap: { position: 'relative' },
+  comboTrigger: {
+    width: '100%', fontFamily: sans, fontSize: 12.5, padding: '10px 30px 10px 11px',
     background: C.surface, color: C.text, border: `1px solid ${C.line}`,
-    borderRadius: 4, outline: 'none', boxSizing: 'border-box',
+    borderRadius: 4, cursor: 'pointer', boxSizing: 'border-box', textAlign: 'left',
+    display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6,
   },
-  searchResults: {
-    position: 'absolute', top: 'calc(100% + 5px)', left: 0, right: 0, zIndex: 20,
+  comboValue: { color: C.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  comboPlaceholder: { color: C.faint, fontFamily: mono, fontSize: 11.5 },
+  comboChevron: { color: C.faint, fontSize: 8, flexShrink: 0 },
+  comboClear: {
+    position: 'absolute', right: 26, top: '50%', transform: 'translateY(-50%)',
+    background: 'transparent', border: 'none', color: C.faint, fontSize: 14,
+    cursor: 'pointer', padding: '2px 4px', lineHeight: 1,
+  },
+  comboPanel: {
+    position: 'absolute', top: 'calc(100% + 5px)', left: 0, right: 0, zIndex: 30,
     background: C.surface, border: `1px solid ${C.line}`, borderRadius: 4,
-    overflow: 'hidden', boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+    boxShadow: '0 12px 28px rgba(0,0,0,0.5)', overflow: 'hidden',
   },
-  searchResultItem: {
+  comboSearch: {
+    width: '100%', fontFamily: mono, fontSize: 11.5, padding: '9px 11px',
+    background: C.bg, color: C.text, border: 'none',
+    borderBottom: `1px solid ${C.line}`, outline: 'none', boxSizing: 'border-box',
+  },
+  comboList: { maxHeight: 220, overflowY: 'auto' },
+  comboOption: {
     display: 'block', width: '100%', textAlign: 'left', fontFamily: sans,
-    fontSize: 13, color: C.text, background: 'transparent', border: 'none',
-    borderBottom: `1px solid ${C.line}`, padding: '10px 13px', cursor: 'pointer',
+    fontSize: 12.5, color: C.text, background: 'transparent', border: 'none',
+    borderBottom: `1px solid ${C.line}`, padding: '9px 11px', cursor: 'pointer',
   },
-  searchResultBrand: { fontFamily: mono, fontSize: 10, color: C.dim },
-  searchNoResults: { fontFamily: mono, fontSize: 11, color: C.faint, padding: '12px 13px' },
+  comboNoResults: { fontFamily: mono, fontSize: 11, color: C.faint, padding: '12px 11px' },
   countRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 6 },
   countText: { fontFamily: mono, fontSize: 10.5, color: C.dim },
   countActions: { display: 'flex', gap: 12 },
@@ -457,22 +530,6 @@ const mobileStyles = {
     border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline',
     textUnderlineOffset: 3,
   },
-  chips: { display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 },
-  chip: {
-    fontFamily: mono,
-    fontSize: 11,
-    padding: '6px 10px',
-    background: 'rgba(61,220,151,0.08)',
-    color: C.real,
-    border: `1px solid ${C.real}`,
-    borderRadius: 2,
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    gap: 2,
-    transition: 'all 120ms ease',
-  },
-  chipX: { color: C.faint, fontSize: 12 },
   empty: { background: C.surface, border: `1px solid ${C.line}`, borderRadius: 4, padding: '20px 10px', textAlign: 'center', marginBottom: 20 },
   emptyText: { color: C.dim, fontSize: 13, margin: 0 },
   scroll: { overflowX: 'auto', marginBottom: 16 },
@@ -498,10 +555,9 @@ const mobileStyles = {
 
 const CSS = `
   * { box-sizing: border-box; }
-  input:focus { border-color: ${C.real} !important; }
-  .chip-btn:hover { background: rgba(61,220,151,0.15) !important; }
-  .search-result-item:hover { background: ${C.line}; }
-  .search-result-item:last-child { border-bottom: none; }
+  .combo-trigger:hover { border-color: ${C.dim}; }
+  .combo-option:hover { background: ${C.line}; }
+  .combo-option:last-child { border-bottom: none; }
   .action-link:hover { opacity: 0.75; }
   .row:hover th, .row:hover td { background: ${C.surface}; }
   button:focus-visible, input:focus-visible { outline: 2px solid ${C.real}; outline-offset: 2px; }
