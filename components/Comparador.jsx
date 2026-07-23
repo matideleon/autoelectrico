@@ -474,7 +474,7 @@ const baseStyles = {
   tagLab: { display: 'block', fontSize: 9, color: C.lab, marginTop: 3, letterSpacing: '0.04em', textTransform: 'none' },
   tagReal: { display: 'block', fontSize: 9, color: C.real, marginTop: 3, letterSpacing: '0.04em', textTransform: 'none' },
   tagQuoted: { display: 'block', fontSize: 9, color: C.dim, marginTop: 3, letterSpacing: '0.02em', fontFamily: mono, whiteSpace: 'normal' },
-  bottomVizGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, alignItems: 'start', marginTop: 20 },
+  bottomVizGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, alignItems: 'stretch', marginTop: 20 },
   legend: { display: 'flex', gap: 20, flexWrap: 'wrap', fontFamily: mono, fontSize: 11, color: C.faint, paddingTop: 16, borderTop: `1px solid ${C.line}` },
 };
 

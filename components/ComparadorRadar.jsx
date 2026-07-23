@@ -109,6 +109,7 @@ export default function ComparadorRadar({ list, allModels }) {
         <div style={S.note}>En precio, más alto significa más accesible</div>
       </div>
 
+      <div style={S.bodyFill}>
       <svg viewBox={`0 0 ${W} ${H}`} style={S.svg} role="img" aria-label="Radar comparativo de precio, batería, autonomía, potencia y baúl">
         {/* Anillos de la grilla */}
         {gridRings.map((f) => {
@@ -182,6 +183,7 @@ export default function ComparadorRadar({ list, allModels }) {
           todavía para ese eje — no se penaliza, se muestra en el punto neutral.
         </div>
       )}
+      </div>
     </div>
   );
 }
@@ -193,6 +195,16 @@ const S = {
     border: '1px solid #2A2E35',
     borderRadius: 8,
     padding: '22px 20px',
+    height: '100%',
+    boxSizing: 'border-box',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  bodyFill: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
   },
   headRow: {
     display: 'flex',

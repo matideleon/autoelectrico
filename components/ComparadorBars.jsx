@@ -121,6 +121,10 @@ const S = {
     borderRadius: 8,
     padding: '22px 20px',
     fontFamily: "'IBM Plex Sans', -apple-system, sans-serif",
+    height: '100%',
+    boxSizing: 'border-box',
+    display: 'flex',
+    flexDirection: 'column',
   },
   headRow: {
     display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
