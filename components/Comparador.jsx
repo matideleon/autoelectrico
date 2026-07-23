@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 
 /* ============================================================
-   evuy — Comparador
+   autoelectrico.uy — Comparador (v2)
 
    El problema real de este componente: cuando un modelo tiene
    autonomía real medida y el otro no, el ojo lee el hueco como
@@ -14,7 +14,11 @@ import React, { useState, useMemo, useEffect } from 'react';
    MISMO tipo de fuente. Real contra real. WLTP contra WLTP.
    Si uno de los dos no tiene el dato, la fila no declara ganador.
 
-   Selector: primero marca, después modelo. Hasta 3.
+   v2: buscador único (marca o modelo, un solo campo) en vez de
+   dos selects en cascada. Hasta 5 modelos. El precio vuelve a
+   la tabla, pero con la misma regla que en /ahorro: se muestra
+   solo si está verificado con fuente — si no, dice "consultar",
+   nunca un número inventado.
    ============================================================ */
 
 const C = {
@@ -32,12 +36,12 @@ const C = {
 const mono = "'IBM Plex Mono', ui-monospace, Menlo, monospace";
 const sans = "'IBM Plex Sans', -apple-system, sans-serif";
 
+const MAX_MODELS = 5;
+
 const fmt = (n) => (n == null ? null : new Intl.NumberFormat('es-UY').format(n));
 
-/* Filas de comparación. `better` define qué dirección gana.
-   `source` marca de dónde viene el dato: eso decide si se puede
-   comparar o no. */
 const ROWS = [
+  { key: 'price_usd', label: 'Precio', unit: 'USD', better: 'lower', source: 'quoted' },
   { key: 'range_real_km', label: 'Autonomía real', unit: 'km', better: 'higher', source: 'measured' },
   { key: 'range_wltp_km', label: 'Autonomía WLTP', unit: 'km', better: 'higher', source: 'lab' },
   { key: 'battery_kwh', label: 'Batería', unit: 'kWh', better: 'higher', source: 'spec' },
@@ -52,10 +56,6 @@ const ROWS = [
   { key: 'warranty_battery', label: 'Garantía batería', unit: '', better: 'none', source: 'spec' },
 ];
 
-/**
- * Decide el ganador de una fila.
- * Devuelve null si no se puede comparar honestamente.
- */
 function winnerOf(row, list) {
   if (row.better === 'none') return null;
   const vals = list.map((m) => m[row.key]);
@@ -69,23 +69,28 @@ function winnerOf(row, list) {
 
 function Cell({ row, m, isWinner, incomparable, styles }) {
   const v = m[row.key];
+  const isPrice = row.key === 'price_usd';
+
   if (v == null) {
     return (
       <td style={styles.td}>
-        <span style={styles.missing}>sin medir</span>
+        <span style={styles.missing}>{isPrice ? 'consultar' : 'sin medir'}</span>
       </td>
     );
   }
   const display = typeof v === 'number' ? fmt(v) : v;
   const isLab = row.source === 'lab';
+  const isQuoted = row.source === 'quoted';
   return (
     <td style={{ ...styles.td, background: isWinner ? 'rgba(61,220,151,0.07)' : 'transparent' }}>
       <span style={{ ...styles.value, color: isLab ? C.lab : C.text, fontSize: typeof v === 'string' ? 12 : 17 }}>
+        {isPrice && <em style={styles.unit}>USD </em>}
         {display}
-        {row.unit && typeof v === 'number' && <em style={styles.unit}> {row.unit}</em>}
+        {row.unit && typeof v === 'number' && !isPrice && <em style={styles.unit}> {row.unit}</em>}
       </span>
       {isWinner && <span style={styles.mark} aria-label="mejor valor">▲</span>}
       {incomparable && <span style={styles.incomp} title="No se puede comparar: falta el dato en otro modelo">·</span>}
+      {isQuoted && v != null && <span style={styles.tagQuoted}>con fuente citada</span>}
     </td>
   );
 }
@@ -93,7 +98,7 @@ function Cell({ row, m, isWinner, incomparable, styles }) {
 export default function Comparador({ models: dbModels }) {
   const [width, setWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
   useEffect(() => {
-    const handler = () => setTimeout(() => setTimeout(() => setTimeout(() => setWidth(window.innerWidth)), 0), 0);
+    const handler = () => setTimeout(() => setWidth(window.innerWidth), 0);
     window.addEventListener('resize', handler);
     return () => window.removeEventListener('resize', handler);
   }, []);
@@ -113,34 +118,68 @@ export default function Comparador({ models: dbModels }) {
     });
   }, [dbModels]);
 
-  // Marcas únicas ordenadas
-  const brands = useMemo(() => {
-    const set = new Set(MODELS_LIVE.map((m) => m.brand).filter(Boolean));
-    return [...set].sort();
+  const [picked, setPicked] = useState([]);
+  const [query, setQuery] = useState('');
+  const [focused, setFocused] = useState(false);
+  const boxRef = useRef(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !MODELS_LIVE.length) return;
+    const params = new URLSearchParams(window.location.search);
+    const ids = params.get('ids');
+    if (!ids) return;
+    const slugs = ids.split(',').filter((s) => MODELS_LIVE.some((m) => m.slug === s));
+    if (slugs.length) setPicked(slugs.slice(0, MAX_MODELS));
   }, [MODELS_LIVE]);
 
-  const [selectedBrand, setSelectedBrand] = useState('');
-  const [picked, setPicked] = useState([]);
+  useEffect(() => {
+    const onClick = (e) => {
+      if (boxRef.current && !boxRef.current.contains(e.target)) setFocused(false);
+    };
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, []);
 
-  // Modelos de la marca seleccionada
-  const brandModels = useMemo(() => {
-    if (!selectedBrand) return [];
-    return MODELS_LIVE.filter((m) => m.brand === selectedBrand);
-  }, [MODELS_LIVE, selectedBrand]);
+  const results = useMemo(() => {
+    if (!query.trim()) return [];
+    const q = query.trim().toLowerCase();
+    return MODELS_LIVE
+      .filter((m) => !picked.includes(m.slug))
+      .filter((m) => `${m.brand} ${m.model} ${m.variant ?? ''}`.toLowerCase().includes(q))
+      .slice(0, 8);
+  }, [query, MODELS_LIVE, picked]);
 
   const addModel = (slug) => {
     setPicked((p) => {
-      if (p.includes(slug)) return p;
-      if (p.length >= 3) return p;
+      if (p.includes(slug) || p.length >= MAX_MODELS) return p;
       return [...p, slug];
     });
+    setQuery('');
   };
 
-  const removeModel = (slug) => {
-    setPicked((p) => p.filter((s) => s !== slug));
-  };
+  const removeModel = (slug) => setPicked((p) => p.filter((s) => s !== slug));
+  const clearAll = () => setPicked([]);
 
   const list = MODELS_LIVE.filter((m) => picked.includes(m.slug));
+
+  const [shareLabel, setShareLabel] = useState('Compartir');
+  const share = async () => {
+    if (typeof window === 'undefined') return;
+    const url = new URL(window.location.href);
+    url.search = picked.length ? `?ids=${picked.join(',')}` : '';
+    window.history.replaceState(null, '', url.toString());
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'Comparativa de eléctricos', url: url.toString() });
+      } else {
+        await navigator.clipboard.writeText(url.toString());
+        setShareLabel('¡Copiado!');
+        setTimeout(() => setShareLabel('Compartir'), 1800);
+      }
+    } catch {
+      // el usuario canceló el share nativo, no hacer nada
+    }
+  };
 
   return (
     <div style={styles.root}>
@@ -150,50 +189,70 @@ export default function Comparador({ models: dbModels }) {
           <div style={styles.eyebrow}>Comparador</div>
           <h1 style={styles.h1}>Poné los números lado a lado</h1>
           <p style={styles.lede}>
-            Hasta tres modelos. Cuando falta un dato lo decimos: comparar
-            contra un hueco sería hacerle perder a quien todavía no midió. El
-            precio no se muestra acá — varía por versión y promoción,
-            consultalo directo con el importador.
+            Hasta {MAX_MODELS} modelos. Cuando falta un dato lo decimos:
+            comparar contra un hueco sería hacerle perder a quien todavía no
+            midió. El precio aparece solo cuando está verificado con fuente.
           </p>
+
+          <div style={styles.badges}>
+            <span style={styles.badge}>Hasta {MAX_MODELS} modelos</span>
+            <span style={styles.badge}>Datos citados con fuente</span>
+            <span style={styles.badge}>Compartí tu comparativa</span>
+          </div>
         </header>
 
-        {/* Selector por marca → modelo */}
-        <div style={styles.selectorWrap}>
-          {/* Marca */}
-          <div style={styles.selectGroup}>
-            <label style={styles.selectLabel}>Marca</label>
-            <select
-              value={selectedBrand}
-              onChange={(e) => setSelectedBrand(e.target.value)}
-              style={styles.select}
-            >
-              <option value="">Elegí una marca</option>
-              {brands.map((b) => (
-                <option key={b} value={b}>{b}</option>
+        <div style={styles.searchBox} ref={boxRef}>
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => setFocused(true)}
+            placeholder={
+              picked.length >= MAX_MODELS
+                ? `Ya elegiste ${MAX_MODELS} modelos — sacá uno para agregar otro`
+                : 'Buscá por marca o modelo (ej: BYD, EX5, Model 3)'
+            }
+            disabled={picked.length >= MAX_MODELS}
+            style={{ ...styles.searchInput, opacity: picked.length >= MAX_MODELS ? 0.5 : 1 }}
+          />
+          {focused && results.length > 0 && (
+            <div style={styles.searchResults}>
+              {results.map((m) => (
+                <button
+                  key={m.slug}
+                  onClick={() => addModel(m.slug)}
+                  style={styles.searchResultItem}
+                  className="search-result-item"
+                >
+                  <span style={styles.searchResultBrand}>{m.brand}</span>{' '}
+                  {m.model}{m.variant ? ` ${m.variant}` : ''}
+                </button>
               ))}
-            </select>
-          </div>
+            </div>
+          )}
+          {focused && query.trim() && results.length === 0 && (
+            <div style={styles.searchResults}>
+              <div style={styles.searchNoResults}>Sin resultados para "{query}"</div>
+            </div>
+          )}
+        </div>
 
-          {/* Modelo */}
-          <div style={styles.selectGroup}>
-            <label style={styles.selectLabel}>Modelo</label>
-            <select
-              value=""
-              onChange={(e) => { if (e.target.value) addModel(e.target.value); }}
-              disabled={!selectedBrand}
-              style={{ ...styles.select, opacity: selectedBrand ? 1 : 0.4 }}
-            >
-              <option value="">{selectedBrand ? 'Elegí modelo' : 'Elegí marca primero'}</option>
-              {brandModels.map((m) => (
-                <option key={m.slug} value={m.slug} disabled={picked.includes(m.slug)}>
-                  {m.model}{m.variant ? ` ${m.variant}` : ''}{picked.includes(m.slug) ? ' (ya agregado)' : ''}
-                </option>
-              ))}
-            </select>
+        <div style={styles.countRow}>
+          <span style={styles.countText}>{picked.length} de {MAX_MODELS} seleccionados</span>
+          <div style={styles.countActions}>
+            {picked.length > 0 && (
+              <button onClick={share} style={styles.actionLink} className="action-link">
+                {shareLabel}
+              </button>
+            )}
+            {picked.length > 0 && (
+              <button onClick={clearAll} style={styles.actionLink} className="action-link">
+                Limpiar todo
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Chips de modelos seleccionados */}
         {picked.length > 0 && (
           <div style={styles.chips}>
             {picked.map((slug) => {
@@ -214,7 +273,6 @@ export default function Comparador({ models: dbModels }) {
           </div>
         )}
 
-        {/* Tabla */}
         {list.length > 0 && (
           <div style={styles.scroll}>
             <table style={styles.table}>
@@ -262,7 +320,7 @@ export default function Comparador({ models: dbModels }) {
 
         {list.length === 0 && (
           <div style={styles.empty}>
-            <p style={styles.emptyText}>Elegí una marca y hasta tres modelos para comparar.</p>
+            <p style={styles.emptyText}>Buscá y agregá hasta {MAX_MODELS} modelos para comparar.</p>
           </div>
         )}
 
@@ -280,27 +338,44 @@ export default function Comparador({ models: dbModels }) {
 
 /* ============================================================ */
 
-/* Base styles (desktop) */
 const baseStyles = {
   root: { background: C.bg, minHeight: '100vh', padding: '32px 20px 80px', fontFamily: sans, color: C.text },
-  wrap: { maxWidth: 860, margin: '0 auto' },
-  head: { marginBottom: 26 },
+  wrap: { maxWidth: 900, margin: '0 auto' },
+  head: { marginBottom: 24 },
   eyebrow: { fontFamily: mono, fontSize: 11, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 },
   h1: { fontSize: 'clamp(28px, 6vw, 40px)', fontWeight: 600, letterSpacing: '-0.02em', margin: '0 0 12px', lineHeight: 1.1 },
-  lede: { fontSize: 14, color: C.dim, lineHeight: 1.6, margin: 0, maxWidth: '56ch' },
-  selectorWrap: { display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' },
-  selectGroup: { display: 'flex', flexDirection: 'column', gap: 6, minWidth: 200 },
-  selectLabel: { fontFamily: mono, fontSize: 10, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.08em' },
-  select: {
-    fontFamily: mono,
-    fontSize: 13,
-    padding: '9px 11px',
-    background: C.surface,
-    color: C.text,
-    border: `1px solid ${C.line}`,
-    borderRadius: 3,
-    outline: 'none',
-    cursor: 'pointer',
+  lede: { fontSize: 14, color: C.dim, lineHeight: 1.6, margin: '0 0 18px', maxWidth: '58ch' },
+  badges: { display: 'flex', gap: 8, flexWrap: 'wrap' },
+  badge: {
+    fontFamily: mono, fontSize: 10.5, color: C.dim, background: C.surface,
+    border: `1px solid ${C.line}`, borderRadius: 20, padding: '6px 13px',
+    letterSpacing: '0.02em',
+  },
+  searchBox: { position: 'relative', marginBottom: 12 },
+  searchInput: {
+    width: '100%', fontFamily: mono, fontSize: 14, padding: '13px 16px',
+    background: C.surface, color: C.text, border: `1px solid ${C.line}`,
+    borderRadius: 5, outline: 'none', boxSizing: 'border-box',
+  },
+  searchResults: {
+    position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, zIndex: 20,
+    background: C.surface, border: `1px solid ${C.line}`, borderRadius: 5,
+    overflow: 'hidden', boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+  },
+  searchResultItem: {
+    display: 'block', width: '100%', textAlign: 'left', fontFamily: sans,
+    fontSize: 14, color: C.text, background: 'transparent', border: 'none',
+    borderBottom: `1px solid ${C.line}`, padding: '11px 16px', cursor: 'pointer',
+  },
+  searchResultBrand: { fontFamily: mono, fontSize: 11, color: C.dim },
+  searchNoResults: { fontFamily: mono, fontSize: 12, color: C.faint, padding: '14px 16px' },
+  countRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexWrap: 'wrap', gap: 8 },
+  countText: { fontFamily: mono, fontSize: 11.5, color: C.dim },
+  countActions: { display: 'flex', gap: 16 },
+  actionLink: {
+    fontFamily: mono, fontSize: 11.5, color: C.real, background: 'transparent',
+    border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline',
+    textUnderlineOffset: 3,
   },
   chips: { display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 },
   chip: {
@@ -337,30 +412,47 @@ const baseStyles = {
   incomp: { color: C.faint, fontSize: 14, marginLeft: 7, cursor: 'help' },
   tagLab: { display: 'block', fontSize: 9, color: C.lab, marginTop: 3, letterSpacing: '0.04em', textTransform: 'none' },
   tagReal: { display: 'block', fontSize: 9, color: C.real, marginTop: 3, letterSpacing: '0.04em', textTransform: 'none' },
+  tagQuoted: { display: 'block', fontSize: 9, color: C.dim, marginTop: 3, letterSpacing: '0.02em', fontFamily: mono, whiteSpace: 'normal' },
   legend: { display: 'flex', gap: 20, flexWrap: 'wrap', fontFamily: mono, fontSize: 11, color: C.faint, paddingTop: 16, borderTop: `1px solid ${C.line}` },
 };
 
-/* Mobile overrides (width < 600px) */
 const mobileStyles = {
   root: { background: C.bg, minHeight: '100vh', padding: '16px 10px 40px', fontFamily: sans, color: C.text },
   wrap: { maxWidth: '100%', margin: '0 auto' },
-  head: { marginBottom: 20 },
+  head: { marginBottom: 18 },
   eyebrow: { fontFamily: mono, fontSize: 10, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 },
   h1: { fontSize: 'clamp(22px, 6vw, 30px)', fontWeight: 600, letterSpacing: '-0.02em', margin: '0 0 10px', lineHeight: 1.1 },
-  lede: { fontSize: 13, color: C.dim, lineHeight: 1.6, margin: 0, maxWidth: '48ch' },
-  selectorWrap: { display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' },
-  selectGroup: { display: 'flex', flexDirection: 'column', gap: 4, minWidth: '100%' },
-  selectLabel: { fontFamily: mono, fontSize: 9, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.08em' },
-  select: {
-    fontFamily: mono,
-    fontSize: 12,
-    padding: '8px 10px',
-    background: C.surface,
-    color: C.text,
-    border: `1px solid ${C.line}`,
-    borderRadius: 3,
-    outline: 'none',
-    cursor: 'pointer',
+  lede: { fontSize: 13, color: C.dim, lineHeight: 1.6, margin: '0 0 14px', maxWidth: '48ch' },
+  badges: { display: 'flex', gap: 6, flexWrap: 'wrap' },
+  badge: {
+    fontFamily: mono, fontSize: 9.5, color: C.dim, background: C.surface,
+    border: `1px solid ${C.line}`, borderRadius: 20, padding: '5px 11px',
+  },
+  searchBox: { position: 'relative', marginBottom: 10 },
+  searchInput: {
+    width: '100%', fontFamily: mono, fontSize: 13, padding: '11px 13px',
+    background: C.surface, color: C.text, border: `1px solid ${C.line}`,
+    borderRadius: 4, outline: 'none', boxSizing: 'border-box',
+  },
+  searchResults: {
+    position: 'absolute', top: 'calc(100% + 5px)', left: 0, right: 0, zIndex: 20,
+    background: C.surface, border: `1px solid ${C.line}`, borderRadius: 4,
+    overflow: 'hidden', boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+  },
+  searchResultItem: {
+    display: 'block', width: '100%', textAlign: 'left', fontFamily: sans,
+    fontSize: 13, color: C.text, background: 'transparent', border: 'none',
+    borderBottom: `1px solid ${C.line}`, padding: '10px 13px', cursor: 'pointer',
+  },
+  searchResultBrand: { fontFamily: mono, fontSize: 10, color: C.dim },
+  searchNoResults: { fontFamily: mono, fontSize: 11, color: C.faint, padding: '12px 13px' },
+  countRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 6 },
+  countText: { fontFamily: mono, fontSize: 10.5, color: C.dim },
+  countActions: { display: 'flex', gap: 12 },
+  actionLink: {
+    fontFamily: mono, fontSize: 10.5, color: C.real, background: 'transparent',
+    border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline',
+    textUnderlineOffset: 3,
   },
   chips: { display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 },
   chip: {
@@ -397,15 +489,19 @@ const mobileStyles = {
   incomp: { color: C.faint, fontSize: 12, marginLeft: 5, cursor: 'help' },
   tagLab: { display: 'block', fontSize: 8, color: C.lab, marginTop: 2, letterSpacing: '0.04em', textTransform: 'none' },
   tagReal: { display: 'block', fontSize: 9, color: C.real, marginTop: 2, letterSpacing: '0.04em', textTransform: 'none' },
+  tagQuoted: { display: 'block', fontSize: 8, color: C.dim, marginTop: 2, letterSpacing: '0.02em', fontFamily: mono, whiteSpace: 'normal' },
   legend: { display: 'flex', gap: 16, flexWrap: 'wrap', fontFamily: mono, fontSize: 10, color: C.faint, paddingTop: 12, borderTop: `1px solid ${C.line}` },
 };
 
 const CSS = `
   * { box-sizing: border-box; }
-  select:focus { border-color: ${C.real} !important; }
+  input:focus { border-color: ${C.real} !important; }
   .chip-btn:hover { background: rgba(61,220,151,0.15) !important; }
+  .search-result-item:hover { background: ${C.line}; }
+  .search-result-item:last-child { border-bottom: none; }
+  .action-link:hover { opacity: 0.75; }
   .row:hover th, .row:hover td { background: ${C.surface}; }
-  button:focus-visible { outline: 2px solid ${C.real}; outline-offset: 2px; }
+  button:focus-visible, input:focus-visible { outline: 2px solid ${C.real}; outline-offset: 2px; }
   em { font-style: normal; }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 `;
