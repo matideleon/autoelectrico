@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import ComparadorRadar from './ComparadorRadar';
+import ComparadorBars from './ComparadorBars';
 
 /* ============================================================
    autoelectrico.uy — Comparador (v2)
@@ -375,6 +376,8 @@ export default function Comparador({ models: dbModels }) {
             <p style={styles.emptyText}>Buscá y agregá hasta {MAX_MODELS} modelos para comparar.</p>
           </div>
         )}
+
+        <ComparadorBars list={list} winnerOf={winnerOf} />
 
         <ComparadorRadar list={list} allModels={MODELS_LIVE} />
 
