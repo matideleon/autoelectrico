@@ -120,7 +120,6 @@ const S = {
     border: '1px solid #2A2E35',
     borderRadius: 8,
     padding: '22px 20px',
-    marginTop: 20,
     fontFamily: "'IBM Plex Sans', -apple-system, sans-serif",
   },
   headRow: {

@@ -31,8 +31,8 @@ const AXIS_ORDER = ['battery_kwh', 'trunk_l', 'range_km', 'price_usd', 'power_hp
 
 const COLORS = ['#3DDC97', '#E8A33D', '#7C9EFF', '#FF6B9D', '#B8734E'];
 
-const W = 400, H = 400;
-const CX = 200, CY = 210;
+const W = 520, H = 400;
+const CX = 260, CY = 210;
 const R_MAX = 150;
 const N = 5;
 
@@ -193,7 +193,6 @@ const S = {
     border: '1px solid #2A2E35',
     borderRadius: 8,
     padding: '22px 20px',
-    marginTop: 20,
   },
   headRow: {
     display: 'flex',

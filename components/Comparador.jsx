@@ -377,9 +377,10 @@ export default function Comparador({ models: dbModels }) {
           </div>
         )}
 
-        <ComparadorBars list={list} winnerOf={winnerOf} />
-
-        <ComparadorRadar list={list} allModels={MODELS_LIVE} />
+        <div style={styles.bottomVizGrid}>
+          <ComparadorBars list={list} winnerOf={winnerOf} />
+          <ComparadorRadar list={list} allModels={MODELS_LIVE} />
+        </div>
 
         {list.length > 0 && (
           <div style={styles.legend}>
@@ -473,6 +474,7 @@ const baseStyles = {
   tagLab: { display: 'block', fontSize: 9, color: C.lab, marginTop: 3, letterSpacing: '0.04em', textTransform: 'none' },
   tagReal: { display: 'block', fontSize: 9, color: C.real, marginTop: 3, letterSpacing: '0.04em', textTransform: 'none' },
   tagQuoted: { display: 'block', fontSize: 9, color: C.dim, marginTop: 3, letterSpacing: '0.02em', fontFamily: mono, whiteSpace: 'normal' },
+  bottomVizGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, alignItems: 'start', marginTop: 20 },
   legend: { display: 'flex', gap: 20, flexWrap: 'wrap', fontFamily: mono, fontSize: 11, color: C.faint, paddingTop: 16, borderTop: `1px solid ${C.line}` },
 };
 
@@ -553,6 +555,7 @@ const mobileStyles = {
   tagLab: { display: 'block', fontSize: 8, color: C.lab, marginTop: 2, letterSpacing: '0.04em', textTransform: 'none' },
   tagReal: { display: 'block', fontSize: 9, color: C.real, marginTop: 2, letterSpacing: '0.04em', textTransform: 'none' },
   tagQuoted: { display: 'block', fontSize: 8, color: C.dim, marginTop: 2, letterSpacing: '0.02em', fontFamily: mono, whiteSpace: 'normal' },
+  bottomVizGrid: { display: 'flex', flexDirection: 'column', gap: 16, marginTop: 16 },
   legend: { display: 'flex', gap: 16, flexWrap: 'wrap', fontFamily: mono, fontSize: 10, color: C.faint, paddingTop: 12, borderTop: `1px solid ${C.line}` },
 };
 
