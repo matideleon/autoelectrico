@@ -28,6 +28,13 @@ const sans = "'IBM Plex Sans', -apple-system, sans-serif";
 /* Agregar artículos nuevos acá arriba (más reciente primero). */
 const ARTICLES = [
   {
+    slug: 'efecto-tesla-byd',
+    category: 'Análisis · Precios',
+    title: '¿Efecto Tesla? BYD bajó precio a tres modelos justo esta semana',
+    dek: 'Yuan Pro GSX, Yuan Plus y Song Plus EV cuestan hoy entre 1.000 y 5.000 dólares menos. No podemos probar que Tesla lo causó — pero el timing invita a preguntarlo.',
+    date: '2026-07-23',
+  },
+  {
     slug: 'tesla-impacto-mercado-uruguay',
     category: 'Análisis · Mercado',
     title: 'El impacto real de Tesla en el mercado eléctrico uruguayo',
