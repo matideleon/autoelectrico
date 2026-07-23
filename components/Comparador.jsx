@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
+import ComparadorRadar from './ComparadorRadar';
 
 /* ============================================================
    autoelectrico.uy — Comparador (v2)
@@ -323,6 +324,8 @@ export default function Comparador({ models: dbModels }) {
             <p style={styles.emptyText}>Buscá y agregá hasta {MAX_MODELS} modelos para comparar.</p>
           </div>
         )}
+
+        <ComparadorRadar list={list} allModels={MODELS_LIVE} />
 
         {list.length > 0 && (
           <div style={styles.legend}>
