@@ -14,6 +14,7 @@
 
 import type { Metadata } from 'next';
 import Nav from '@/components/Nav';
+import CargaPublicaSimulator from '@/components/CargaPublicaSimulator';
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://autoelectrico.uy';
 
@@ -304,17 +305,39 @@ export default function CargaPage() {
             </p>
           </section>
 
-          {/* ============ SECCIÓN: EN LA CALLE (stub) ============ */}
+          {/* ============ SECCIÓN: EN LA CALLE ============ */}
 
-          <section style={{ ...S.section, ...S.stubSection }}>
-            <div style={S.stubBadge}>Próximamente</div>
+          <section style={S.section}>
             <h2 style={S.h2}>Carga pública</h2>
             <p style={S.p}>
-              Estamos armando el mapa y la guía de cargadores públicos en
-              Uruguay — corredores de ruta, carga rápida DC, y cómo
-              funcionan las apps de cada red. Si mientras tanto necesitás
-              cargar en la calle, UTE tiene su propia red en expansión a
-              través del portal de Movilidad Eléctrica.
+              UTE opera más de 400 puntos de carga en los 19 departamentos,
+              incluyendo varias estaciones ANCAP del interior — esos
+              cargadores en estaciones de servicio también son de UTE, no
+              de ANCAP. Buscamos específicamente si había otros operadores
+              (Zunder, Enel X, Powerdot, Electromaps) y ninguno opera en
+              Uruguay — son redes europeas, o apps que listan puntos sin
+              tarifa propia acá. Por eso este simulador es de un solo
+              operador, no un comparador.
+            </p>
+            <p style={S.p}>
+              La estructura de precio tiene tres partes: un cargo fijo por
+              conectarte (distinto en carga lenta y rápida), el precio por
+              cada kWh que cargás, y un cargo extra si dejás el auto
+              conectado más de 20 minutos sin que esté cargando.
+            </p>
+          </section>
+
+          <CargaPublicaSimulator />
+
+          <section style={S.section}>
+            <h2 style={S.h2}>Casa vs. calle: la diferencia real</h2>
+            <p style={S.p}>
+              Según los propios números de UTE, recorrer 100 km cargando en
+              tu casa con tarifa nocturna cuesta unos $37. Hacer esos mismos
+              100 km en la red pública cuesta unos $195 — hasta 5 veces más.
+              La carga pública sirve para viajes largos o cuando no tenés
+              dónde cargar en casa, no como reemplazo de la carga
+              domiciliaria de todos los días.
             </p>
           </section>
 
