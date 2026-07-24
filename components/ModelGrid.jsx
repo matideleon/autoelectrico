@@ -45,7 +45,14 @@ function ModelCard({ m }) {
       </div>
 
       <div style={S.price}>
-        <span style={S.noPrice}>consultá el precio</span>
+        {m.price_usd != null ? (
+          <>
+            <em style={S.currency}>USD </em>
+            {fmt(m.price_usd)}
+          </>
+        ) : (
+          <span style={S.noPrice}>consultá el precio</span>
+        )}
       </div>
 
       <div style={S.ranges}>

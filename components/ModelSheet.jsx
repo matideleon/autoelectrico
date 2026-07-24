@@ -228,17 +228,35 @@ function Spec({ label, value, unit, tone = 'real', note }) {
 }
 
 /* ---------- Precio ---------- */
-function PriceBlock() {
+function PriceBlock({ m }) {
+  const hasPrice = m.price_usd != null;
   return (
     <div style={{ ...S.price, borderColor: C.line }}>
       <div style={S.priceLabel}>Precio en Uruguay</div>
-      <div style={{ ...S.priceValue, color: C.dim, fontSize: 22 }}>
-        Consultá con el importador
-      </div>
-      <div style={S.priceFoot}>
-        El precio varía por versión y promoción vigente. Preguntale al bot de
-        acá abajo o contactá directo al concesionario.
-      </div>
+      {hasPrice ? (
+        <>
+          <div style={S.priceValue}>
+            <em style={S.currency}>USD </em>
+            {fmt(m.price_usd)}
+          </div>
+          <div style={S.priceFoot}>
+            {m.importer ? `${m.importer} · ` : ''}
+            {m.price_source ? `fuente: ${m.price_source}` : ''}
+            {m.price_updated_at ? ` · actualizado ${new Date(m.price_updated_at).toLocaleDateString('es-UY')}` : ''}
+            {' — varía por versión y promoción vigente.'}
+          </div>
+        </>
+      ) : (
+        <>
+          <div style={{ ...S.priceValue, color: C.dim, fontSize: 22 }}>
+            Consultá con el importador
+          </div>
+          <div style={S.priceFoot}>
+            El precio varía por versión y promoción vigente. Preguntale al bot de
+            acá abajo o contactá directo al concesionario.
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -329,7 +347,7 @@ export default function ModelSheet({ model }) {
           <p style={S.summary}>{m.summary}</p>
         </header>
 
-        <PriceBlock />
+        <PriceBlock m={m} />
 
         {/* Signature */}
         <section style={S.section}>

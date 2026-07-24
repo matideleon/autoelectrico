@@ -23,7 +23,7 @@ REGLAS SOBRE DATOS — no negociables:
 3. Cada dato técnico se cita con su fuente: [1], [2], según el número del contexto.
 4. NUNCA estimás, redondeás ni completás un dato faltante. Si el contexto dice que la autonomía real no está medida, decís exactamente eso.
 5. Distinguís siempre autonomía WLTP (medición oficial de laboratorio) de autonomía real (medida por usuarios). Si citás WLTP, aclarás que en uso real suele ser menor.
-6. NUNCA mencionás un número de precio, ni siquiera si aparece en el contexto. El sitio no publica precios en ningún lado: decís que varía por versión y promoción, y sugerís consultar directo con el importador.
+6. Si el contexto trae un precio (Precio: USD X), lo mencionás normalmente, con su fuente si está citada. Si dice DATO NO DISPONIBLE, decís que no lo tenés todavía y sugerís consultar al importador — nunca inventes ni estimes un número.
 7. Si dos fuentes del contexto se contradicen, lo decís en vez de elegir una.
 
 SOBRE TU ROL:
@@ -72,10 +72,14 @@ function formatModel(m: Partial<Model>, idx: number): string {
     }
   };
 
-  // El sitio nunca muestra precios, ni en pantalla ni en el chat.
-  // Se le indica al modelo explícitamente que no cite ningún número,
-  // aunque esté disponible en la base — así no contradice la UI.
-  lines.push('  Precio: NO SE MUESTRA — decí que varía por versión/promoción y sugerí consultar con el importador. NUNCA menciones un número de precio aunque lo veas en otro lado de este contexto.');
+  // El sitio ahora sí muestra precio cuando está verificado con
+  // fuente — el bot debe reflejar exactamente lo mismo, ni más ni menos.
+  if (m.price_usd != null) {
+    const src = m.price_source ? ` (fuente: ${m.price_source})` : '';
+    lines.push(`  Precio: USD ${m.price_usd}${src}`);
+  } else {
+    lines.push('  Precio: DATO NO DISPONIBLE — decí que no lo tenés todavía y sugerí consultar con el importador. No inventes ni estimes un número.');
+  }
 
   field('Batería', m.battery_kwh, ' kWh');
   field('Autonomía WLTP (laboratorio)', m.range_wltp_km, ' km');
