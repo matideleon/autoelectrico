@@ -20,6 +20,7 @@ import {
 } from './prompts';
 import { cacheKey, getCached, setCached } from './cache';
 import * as models from '../db/models';
+import { consultarPorIntencion } from './query';
 import type { Model } from '../db/types';
 
 const MODEL_ID = 'claude-sonnet-4-6';
@@ -178,17 +179,22 @@ export async function chat(req: ChatRequest): Promise<ChatResponse> {
 
   // ---- Fichas de modelos ----
   let modelCards: Partial<Model>[] = [];
+  let resumenConsulta: string | null = null;
   if (targetModel) {
     modelCards = [targetModel];
   } else if (budget) {
     modelCards = await models.recommendByBudget(budget, { limit: 4 });
   } else {
-    // Modelos mencionados por nombre en la pregunta
-    const found = await models.listModels(null, { search: question, limit: 3 });
-    modelCards = found;
+    // Enrutador de intención: entiende superlativos ("el más barato"),
+    // filtros ("SUV hasta 40 mil"), agregados ("cuántas marcas hay")
+    // y comparaciones, además de la búsqueda por nombre de siempre.
+    const r = await consultarPorIntencion(question);
+    modelCards = r.modelos;
+    if (r.resumen) resumenConsulta = r.resumen;
   }
 
-  const context = buildContext({ chunks, models: modelCards });
+  const context = buildContext({ chunks, models: modelCards })
+    + (resumenConsulta ? `\n\n=== RESULTADO DE LA CONSULTA A LA BASE ===\n${resumenConsulta}` : '');
 
   // ---- Generación ----
   const messages: Anthropic.MessageParam[] = [
