@@ -47,9 +47,11 @@ export default async function Home() {
     <>
       <Nav />
       <NewsFeed />
+      {/* HomeSections es .jsx sin tipos: TS infiere never[] de sus
+          valores por defecto, así que casteamos acá. */}
       <HomeSections
-        destacados={serialize(destacados)}
-        stats={serialize(statsRows)[0] ?? {}}
+        destacados={serialize(destacados) as never}
+        stats={(serialize(statsRows)[0] ?? {}) as never}
       />
     </>
   );
