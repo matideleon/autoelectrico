@@ -29,7 +29,7 @@ function serialize(m: Record<string, unknown>): Record<string, unknown> {
 }
 
 export default async function ModelosPage() {
-  const list = await models.listModels(null, { limit: 50 });
+  const list = await models.listModels(null, { limit: 200 });
 
   return (
     <>

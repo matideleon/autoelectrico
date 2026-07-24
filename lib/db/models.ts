@@ -49,7 +49,7 @@ export async function listModels(
   }
 
   const { where, params, nextIndex } = w.build();
-  const limit = Math.min(filters.limit ?? 50, 100);
+  const limit = Math.min(filters.limit ?? 50, 200);
 
   return query<Partial<Model>>(
     `SELECT ${LIST_COLS}
