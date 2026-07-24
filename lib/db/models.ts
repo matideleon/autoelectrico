@@ -55,7 +55,7 @@ export async function listModels(
     `SELECT ${LIST_COLS}
      FROM models m
      ${where}
-     ORDER BY m.price_usd ASC NULLS LAST
+     ORDER BY m.brand ASC, m.model ASC
      LIMIT $${nextIndex} OFFSET $${nextIndex + 1}`,
     [...params, limit, filters.offset ?? 0]
   );
