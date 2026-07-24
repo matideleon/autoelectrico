@@ -118,6 +118,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
 
   const selectStyle: React.CSSProperties = {
     width: '100%',
+    boxSizing: 'border-box',
     background: '#141619',
     border: '1px solid #2a2d33',
     borderRadius: '4px',
@@ -226,6 +227,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                   onChange={(e) => setKilometrosPorMes(Number(e.target.value))}
                   style={{
                     width: '100%',
+                    boxSizing: 'border-box',
                     background: '#141619',
                     border: '1px solid #2a2d33',
                     borderRadius: '4px',
@@ -287,6 +289,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                   onChange={(e) => setPrecioNafta(Number(e.target.value))}
                   style={{
                     width: '100%',
+                    boxSizing: 'border-box',
                     background: '#141619',
                     border: '1px solid #2a2d33',
                     borderRadius: '4px',
@@ -326,6 +329,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                   onChange={(e) => setConsumoCombustion(Number(e.target.value))}
                   style={{
                     width: '100%',
+                    boxSizing: 'border-box',
                     background: '#141619',
                     border: '1px solid #2a2d33',
                     borderRadius: '4px',
@@ -494,6 +498,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                   readOnly
                   style={{
                     width: '100%',
+                    boxSizing: 'border-box',
                     background: '#141619',
                     border: '1px solid #2a2d33',
                     borderRadius: '4px',
@@ -533,6 +538,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                   onChange={(e) => setConsumoElectrico(Number(e.target.value))}
                   style={{
                     width: '100%',
+                    boxSizing: 'border-box',
                     background: '#141619',
                     border: '1px solid #2a2d33',
                     borderRadius: '4px',
@@ -572,6 +578,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                   placeholder="Ingresá el precio"
                   style={{
                     width: '100%',
+                    boxSizing: 'border-box',
                     background: '#141619',
                     border: '1px solid #2a2d33',
                     borderRadius: '4px',
@@ -629,6 +636,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                   onChange={(e) => setTipoCambio(Number(e.target.value))}
                   style={{
                     width: '100%',
+                    boxSizing: 'border-box',
                     background: '#141619',
                     border: '1px solid #2a2d33',
                     borderRadius: '4px',

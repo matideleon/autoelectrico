@@ -168,7 +168,7 @@ const S = {
   brand: {
     fontFamily: mono,
     fontSize: 11,
-    color: C.faint,
+    color: C.dim,
     letterSpacing: '0.06em',
   },
   model: {
