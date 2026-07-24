@@ -32,7 +32,7 @@ function ModelCard({ m }) {
   const wltp = m.range_wltp_km != null ? Number(m.range_wltp_km) : null;
 
   return (
-    <a href={`/modelos/${m.slug}`} className="model-card" style={S.card}>
+    <a href={`/modelos/${m.slug}`} className="model-card lg" style={S.card}>
       <div style={S.cardHead}>
         <div>
           <div style={S.brand}>{m.brand}</div>

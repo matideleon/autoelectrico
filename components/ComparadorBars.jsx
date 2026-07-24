@@ -48,7 +48,7 @@ export default function ComparadorBars({ list, winnerOf }) {
   if (visibleMetrics.length === 0) return null;
 
   return (
-    <div style={S.card}>
+    <div className="lg" style={S.card}>
       <div style={S.headRow}>
         <div style={S.title}>Valores principales</div>
         <div style={S.note}>La estrella indica el mejor resultado</div>

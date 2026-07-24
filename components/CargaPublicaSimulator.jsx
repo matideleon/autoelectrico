@@ -117,7 +117,7 @@ export default function CargaPublicaSimulator() {
   const selectStyle = S.input;
 
   return (
-    <div style={S.card}>
+    <div className="lg" style={S.card}>
       <div style={S.head}>
         <div style={S.title}>Simulador de carga pública</div>
         <div style={S.subtitle}>6 operadores — UTE, DISA, Mobility, DMC, eOne, Evergo</div>

@@ -69,7 +69,7 @@ export default function ComparadorRadar({ list, allModels }) {
 
   if (list.length === 0) {
     return (
-      <div style={S.card}>
+      <div className="lg" style={S.card}>
         <div style={S.headRow}>
           <div>
             <div style={S.title}>Perfil comparativo</div>
@@ -100,7 +100,7 @@ export default function ComparadorRadar({ list, allModels }) {
   const gridRings = [0.25, 0.5, 0.75, 1];
 
   return (
-    <div style={S.card}>
+    <div className="lg" style={S.card}>
       <div style={S.headRow}>
         <div>
           <div style={S.title}>Perfil comparativo</div>
