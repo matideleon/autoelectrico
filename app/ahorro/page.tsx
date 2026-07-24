@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import SavingsChart from '@/components/SavingsChart';
+import Nav from '@/components/Nav';
 
 interface ModelOption {
   slug: string;
@@ -142,28 +143,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
           .ahorro-vehicle-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
-      {/* Navigation */}
-      <nav style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '20px 40px',
-        borderBottom: '1px solid #2a2d33'
-      }}>
-        <a href="/" style={{
-          color: '#fff',
-          textDecoration: 'none',
-          fontSize: '18px',
-          fontWeight: '500'
-        }}>
-          autoelectrico.<span style={{ color: '#00d084' }}>uy</span>
-        </a>
-        <div style={{ display: 'flex', gap: '30px' }}>
-          <a href="/modelos" style={{ color: '#aaa', textDecoration: 'none' }}>Modelos</a>
-          <a href="/comparar" style={{ color: '#aaa', textDecoration: 'none' }}>Comparar</a>
-          <a href="/ahorro" style={{ color: '#fff', textDecoration: 'none' }}>Ahorro</a>
-        </div>
-      </nav>
+      <Nav />
 
       {/* Header */}
       <header style={{
