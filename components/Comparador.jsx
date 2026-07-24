@@ -328,7 +328,7 @@ export default function Comparador({ models: dbModels }) {
 
         {list.length > 0 && (
           <div style={styles.scroll}>
-            <table style={styles.table}>
+            <table style={{ ...styles.table, tableLayout: 'fixed' }}>
               <caption style={styles.caption}>
                 Comparación de {list.length} modelos eléctricos disponibles en Uruguay
               </caption>
@@ -338,7 +338,7 @@ export default function Comparador({ models: dbModels }) {
                     <span style={styles.srOnly}>Dato</span>
                   </th>
                   {list.map((m) => (
-                    <th key={m.slug} style={styles.th} scope="col">
+                    <th key={m.slug} style={{ ...styles.th, width: `${70 / list.length}%` }} scope="col">
                       <div style={styles.thBrand}>{m.brand}</div>
                       <div style={styles.thModel}>{m.model}</div>
                     </th>
@@ -465,7 +465,7 @@ const baseStyles = {
   thBrand: { fontFamily: mono, fontSize: 11, color: C.faint, letterSpacing: '0.06em' },
   thModel: { fontSize: 17, fontWeight: 600, letterSpacing: '-0.01em', marginTop: 2 },
   rowLabel: { fontFamily: mono, fontSize: 11, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'left', fontWeight: 400, padding: '13px 14px', borderBottom: `1px solid ${C.line}`, verticalAlign: 'middle' },
-  td: { padding: '13px 14px', borderBottom: `1px solid ${C.line}`, verticalAlign: 'middle', whiteSpace: 'nowrap' },
+  td: { padding: '13px 14px', borderBottom: `1px solid ${C.line}`, verticalAlign: 'middle' },
   value: { fontFamily: mono, fontWeight: 500, letterSpacing: '-0.01em' },
   unit: { fontSize: 11, color: C.dim, fontStyle: 'normal' },
   missing: { fontFamily: mono, fontSize: 12, color: C.gap, fontStyle: 'italic' },
@@ -546,7 +546,7 @@ const mobileStyles = {
   thBrand: { fontFamily: mono, fontSize: 10, color: C.faint, letterSpacing: '0.06em' },
   thModel: { fontSize: 14, fontWeight: 600, letterSpacing: '-0.01em', marginTop: 1 },
   rowLabel: { fontFamily: mono, fontSize: 10, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'left', fontWeight: 400, padding: '8px 8px', borderBottom: `1px solid ${C.line}`, verticalAlign: 'middle' },
-  td: { padding: '8px 8px', borderBottom: `1px solid ${C.line}`, verticalAlign: 'middle', whiteSpace: 'nowrap' },
+  td: { padding: '8px 8px', borderBottom: `1px solid ${C.line}`, verticalAlign: 'middle' },
   value: { fontFamily: mono, fontWeight: 500, letterSpacing: '-0.01em' },
   unit: { fontSize: 10, color: C.dim, fontStyle: 'normal' },
   missing: { fontFamily: mono, fontSize: 11, color: C.gap, fontStyle: 'italic' },
