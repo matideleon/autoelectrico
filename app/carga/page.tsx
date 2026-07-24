@@ -249,6 +249,104 @@ export default function CargaPage() {
             </ul>
           </section>
 
+          <section style={S.section}>
+            <h2 style={S.h2}>El instructivo: materiales y pasos del trabajo</h2>
+            <p style={S.p}>
+              Esto no lo tenés que hacer vos — lo hace el electricista. Pero
+              sirve saber qué va a traer y qué va a hacer, para entender el
+              presupuesto y no llevarte sorpresas.
+            </p>
+
+            <h3 style={S.h3}>Materiales</h3>
+            <ul style={S.checklist}>
+              <li><strong>Wallbox</strong> — 7 kW si tu instalación es monofásica, 22 kW si es trifásica.</li>
+              <li><strong>Diferencial</strong> — Tipo A (si el wallbox ya trae sensor RDC-DD de 6 mA) o Tipo B (si no lo trae).</li>
+              <li><strong>Interruptor termomagnético (térmica) dedicado</strong>, curva C o D según lo que pida el fabricante del wallbox.</li>
+              <li><strong>Cable de sección adecuada</strong> a la distancia y la corriente — lo calcula el electricista, no es un número fijo para todos los casos.</li>
+              <li><strong>Caño o canalización rígida</strong> para proteger el cableado en todo su recorrido.</li>
+              <li><strong>Jabalina de puesta a tierra</strong>, nueva o a corregir si la que ya existe no da una resistencia aceptable.</li>
+              <li><strong>Gabinete con protección IPX4</strong> si el wallbox va a quedar expuesto a la intemperie.</li>
+            </ul>
+
+            <h3 style={S.h3}>Los pasos del trabajo</h3>
+            <div style={S.scenarioCard}>
+              <div style={S.scenarioNum}>1</div>
+              <div>
+                <div style={S.scenarioTitle}>Relevamiento técnico</div>
+                <p style={S.scenarioText}>
+                  El electricista revisa tu tablero, tu potencia contratada y
+                  la distancia desde el tablero hasta donde vas a estacionar.
+                  Con eso define qué wallbox y qué cable necesitás.
+                </p>
+              </div>
+            </div>
+            <div style={S.scenarioCard}>
+              <div style={S.scenarioNum}>2</div>
+              <div>
+                <div style={S.scenarioTitle}>Trámite de potencia con UTE, si hace falta</div>
+                <p style={S.scenarioText}>
+                  Según cuál de los tres escenarios de arriba te toque —
+                  puede ser un llamado tuyo al 1930, o puede necesitar firma
+                  instaladora si hay que pasar a trifásico.
+                </p>
+              </div>
+            </div>
+            <div style={S.scenarioCard}>
+              <div style={S.scenarioNum}>3</div>
+              <div>
+                <div style={S.scenarioTitle}>Tendido de la línea dedicada</div>
+                <p style={S.scenarioText}>
+                  Cableado exclusivo desde el tablero principal hasta el
+                  wallbox, sin empalmes ni compartir con otros circuitos de
+                  la casa.
+                </p>
+              </div>
+            </div>
+            <div style={S.scenarioCard}>
+              <div style={S.scenarioNum}>4</div>
+              <div>
+                <div style={S.scenarioTitle}>Instalación de las protecciones</div>
+                <p style={S.scenarioText}>
+                  Térmica y diferencial dedicados a este circuito, en el
+                  tablero principal — nunca compartidos con otro enchufe o
+                  electrodoméstico.
+                </p>
+              </div>
+            </div>
+            <div style={S.scenarioCard}>
+              <div style={S.scenarioNum}>5</div>
+              <div>
+                <div style={S.scenarioTitle}>Verificación de la puesta a tierra</div>
+                <p style={S.scenarioText}>
+                  Se mide la resistencia de la jabalina existente. Si no da
+                  un valor aceptable, se corrige o se instala una nueva antes
+                  de seguir.
+                </p>
+              </div>
+            </div>
+            <div style={S.scenarioCard}>
+              <div style={S.scenarioNum}>6</div>
+              <div>
+                <div style={S.scenarioTitle}>Montaje del wallbox</div>
+                <p style={S.scenarioText}>
+                  Fijación a la pared y conexión del cableado ya tendido.
+                </p>
+              </div>
+            </div>
+            <div style={S.scenarioCard}>
+              <div style={S.scenarioNum}>7</div>
+              <div>
+                <div style={S.scenarioTitle}>Pruebas y entrega</div>
+                <p style={S.scenarioText}>
+                  Una carga de prueba para confirmar que todo funciona y que
+                  las protecciones actúan como corresponde. Si hubo trámite
+                  con firma instaladora, te entregan la documentación (DAR)
+                  correspondiente.
+                </p>
+              </div>
+            </div>
+          </section>
+
           <section style={{ ...S.section, ...S.highlightSection }}>
             <div style={S.eyebrowSmall}>Antes de pedir presupuesto</div>
             <h2 style={S.h2}>El "punto de medida" puede encarecer todo</h2>
