@@ -21,17 +21,12 @@ export default async function Home() {
      FROM models
      WHERE status = 'published' AND price_usd IS NOT NULL
      ORDER BY price_usd ASC
-     LIMIT 6`
+     LIMIT 8`
   );
 
-  // Estado real del catálogo: no inventamos los números, los contamos.
+  // Total real de publicados, para el link "ver los N modelos".
   const statsRows = await query(
-    `SELECT
-       COUNT(*) FILTER (WHERE status = 'published') AS total,
-       COUNT(*) FILTER (WHERE status = 'published' AND price_usd IS NOT NULL) AS con_precio,
-       COUNT(*) FILTER (WHERE status = 'published' AND range_real_km IS NOT NULL) AS con_real,
-       COUNT(DISTINCT brand) FILTER (WHERE status = 'published') AS marcas
-     FROM models`
+    `SELECT COUNT(*) AS total FROM models WHERE status = 'published'`
   );
 
   const serialize = (rows: Record<string, unknown>[]) =>

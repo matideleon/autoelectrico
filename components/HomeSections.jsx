@@ -43,16 +43,10 @@ const HERRAMIENTAS = [
     cta: 'Calcular mi ahorro',
   },
   {
-    href: '/carga/hogar',
-    titulo: 'Carga en casa',
-    desc: 'Qué potencia necesitás, qué exige UTE, qué diferencial va, y los materiales y pasos de la instalación.',
-    cta: 'Ver la guía',
-  },
-  {
-    href: '/carga/publica',
-    titulo: 'Carga pública',
-    desc: 'Los 6 operadores del país comparados. Elegí tu auto y cuánto querés cargar, y te decimos dónde te sale más barato.',
-    cta: 'Comparar tarifas',
+    href: '/carga',
+    titulo: 'Guías de carga',
+    desc: 'En casa: qué potencia necesitás, qué exige UTE y los pasos de la instalación. En la calle: los 6 operadores del país comparados por tarifa.',
+    cta: 'Ver las guías',
   },
 ];
 
@@ -83,9 +77,6 @@ function ModeloCard({ m }) {
 
 export default function HomeSections({ destacados = [], stats = {} }) {
   const total = Number(stats.total ?? 0);
-  const conPrecio = Number(stats.con_precio ?? 0);
-  const conReal = Number(stats.con_real ?? 0);
-  const marcas = Number(stats.marcas ?? 0);
 
   return (
     <div style={S.root}>
@@ -131,45 +122,6 @@ export default function HomeSections({ destacados = [], stats = {} }) {
           </div>
         </section>
 
-        {/* ===== Estado del catálogo ===== */}
-        <section style={S.section}>
-          <div style={S.sectionHead}>
-            <div>
-              <h2 style={S.h2}>Cómo estamos con los datos</h2>
-              <p style={S.sectionNote}>
-                Estos números salen de contar la base ahora mismo. El hueco
-                también es información: preferimos decir que falta antes que
-                inventarlo.
-              </p>
-            </div>
-          </div>
-          <div style={S.statsGrid}>
-            <div className="lg" style={S.statCard}>
-              <div style={S.statNum}>{total}</div>
-              <div style={S.statLabel}>modelos publicados</div>
-            </div>
-            <div className="lg" style={S.statCard}>
-              <div style={S.statNum}>{marcas}</div>
-              <div style={S.statLabel}>marcas</div>
-            </div>
-            <div className="lg" style={S.statCard}>
-              <div style={{ ...S.statNum, color: C.real }}>{conPrecio}</div>
-              <div style={S.statLabel}>con precio verificado</div>
-            </div>
-            <div className="lg" style={S.statCard}>
-              <div style={{ ...S.statNum, color: conReal > 0 ? C.real : C.lab }}>{conReal}</div>
-              <div style={S.statLabel}>con autonomía real medida acá</div>
-            </div>
-          </div>
-          {conReal < total && (
-            <p style={S.gapNote}>
-              Nos faltan {total - conReal} autonomías reales medidas en
-              Uruguay. Si tenés un eléctrico y querés aportar la tuya, entrá
-              a la ficha de tu modelo — se suma con tu nombre como fuente.
-            </p>
-          )}
-        </section>
-
       </div>
     </div>
   );
@@ -187,15 +139,19 @@ const S = {
   sectionNote: { fontSize: 13.5, color: C.dim, lineHeight: 1.6, margin: 0, maxWidth: '56ch' },
   sectionLink: { fontFamily: mono, fontSize: 12.5, color: C.real, textDecoration: 'none', whiteSpace: 'nowrap' },
 
-  modelsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: 12 },
+  modelsGrid: {
+    display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))',
+    gap: 12, alignItems: 'stretch',
+  },
   modelCard: {
-    display: 'block', padding: '16px', background: C.surface,
+    display: 'flex', flexDirection: 'column', padding: '16px', background: C.surface,
     border: `1px solid ${C.line}`, borderRadius: 6, textDecoration: 'none',
     color: C.text, transition: 'border-color 150ms ease, transform 150ms ease',
+    height: '100%', boxSizing: 'border-box',
   },
   modelBrand: { fontFamily: mono, fontSize: 10, color: C.faint, letterSpacing: '0.06em' },
   modelName: { fontSize: 15, fontWeight: 600, marginTop: 2, marginBottom: 10, lineHeight: 1.3 },
-  modelPrice: { fontFamily: mono, fontSize: 18, fontWeight: 500, marginBottom: 8 },
+  modelPrice: { fontFamily: mono, fontSize: 18, fontWeight: 500, marginBottom: 8, marginTop: 'auto' },
   currency: { fontSize: 11, color: C.dim, fontStyle: 'normal' },
   modelSpecs: {
     display: 'flex', gap: 10, flexWrap: 'wrap',
@@ -203,27 +159,19 @@ const S = {
     paddingTop: 8, borderTop: `1px solid ${C.line}`,
   },
 
-  toolsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 },
+  toolsGrid: {
+    display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+    gap: 14, alignItems: 'stretch',
+  },
   toolCard: {
-    display: 'block', padding: '20px', background: C.surface,
+    display: 'flex', flexDirection: 'column', padding: '20px', background: C.surface,
     border: `1px solid ${C.line}`, borderRadius: 6, textDecoration: 'none',
     color: C.text, transition: 'border-color 150ms ease, transform 150ms ease',
+    height: '100%', boxSizing: 'border-box',
   },
   toolTitle: { fontSize: 17, fontWeight: 600, marginBottom: 8 },
   toolDesc: { fontSize: 13.5, color: C.dim, lineHeight: 1.6, margin: '0 0 14px' },
-  toolCta: { fontFamily: mono, fontSize: 12, color: C.real },
-
-  statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12 },
-  statCard: {
-    padding: '20px 18px', background: C.surface, border: `1px solid ${C.line}`,
-    borderRadius: 6, textAlign: 'center',
-  },
-  statNum: { fontFamily: mono, fontSize: 30, fontWeight: 600, letterSpacing: '-0.02em', lineHeight: 1 },
-  statLabel: { fontSize: 11.5, color: C.dim, marginTop: 8, lineHeight: 1.4 },
-  gapNote: {
-    fontSize: 13, color: C.dim, lineHeight: 1.6, marginTop: 16,
-    paddingTop: 16, borderTop: `1px solid ${C.line}`,
-  },
+  toolCta: { fontFamily: mono, fontSize: 12, color: C.real, marginTop: 'auto' },
 };
 
 const CSS = `
