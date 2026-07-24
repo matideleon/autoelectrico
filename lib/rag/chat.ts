@@ -127,7 +127,19 @@ export async function chat(req: ChatRequest): Promise<ChatResponse> {
   if (!question.trim()) throw new Error('Pregunta vacía');
   if (question.length > 2000) throw new Error('Pregunta demasiado larga');
 
-  const budget = extractBudget(question);
+  // El presupuesto puede haber quedado en un mensaje anterior: si la
+  // persona dijo "tengo 35 mil" y después responde "ciudad", ese
+  // segundo mensaje no tiene número — sin esto, el contexto queda
+  // vacío y el bot dice que no tiene datos cuando en realidad sí.
+  const budget =
+    extractBudget(question) ??
+    history
+      .filter((m) => m.role === 'user')
+      .slice(-6)
+      .reverse()
+      .map((m) => extractBudget(m.content))
+      .find((b) => b != null) ??
+    null;
   const advisorMode = looksLikeBuyingIntent(question) || budget !== null;
 
   // Cache: solo preguntas sin historial. Con contexto previo, la
