@@ -3,31 +3,19 @@
 import React, { useState, useEffect, useMemo } from 'react';
 
 /* ============================================================
-   Simulador de carga pública — UTE
+   Simulador de carga pública — 6 operadores
 
-   UTE es, hoy, la única red con tarifa pública verificable en
-   Uruguay. Buscamos específicamente otros operadores (Zunder,
-   Enel X, Powerdot, Electromaps) y ninguno opera acá — son redes
-   europeas. Electromaps es una app que lista puntos, no un
-   operador con tarifa propia en Uruguay. Las estaciones ANCAP del
-   interior usan cargadores de UTE, no una tarifa propia. Por eso
-   este simulador es de un solo operador, no un comparador — lo
-   decimos explícito en vez de simular una competencia que no
-   existe todavía.
+   Datos recopilados por el equipo de autoelectrico.uy a partir de
+   las tarifas publicadas por cada operador (UTE, DISA, Mobility,
+   DMC, eOne, Evergo), julio 2026. No son de un único sitio externo
+   — se citan así, como dato propio del sitio, igual que hacemos
+   con la autonomía "medida acá".
 
-   Lógica del simulador: elegís tu vehículo (autocompleta la
-   batería real de nuestro catálogo) y un rango de carga (SOC,
-   ej. 20% → 80%) en vez de tipear kWh sueltos — así el número
-   sale de datos reales del auto, no de una estimación a ojo.
-
-   Estructura de precio real (resolución UTE, enero 2026):
-     cargo base ("bajada de bandera") + kWh cargados × precio/kWh
-   Distinto para corriente alterna (AC) y continua (DC). Hay
-   además un cargo por tiempo conectado sin cargar después de 20
-   minutos, que no simulamos: no hay un monto público confirmado.
-
-   Los precios son editables a propósito: UTE avisó que iba a
-   seguir ajustando durante 2026.
+   Lógica: elegís vehículo (autocompleta batería) y un rango de
+   carga (SOC), calculamos los kWh reales, y mostramos el costo en
+   TODOS los operadores/franjas, ordenado de más barato a más caro
+   — para ese kWh específico, no un ranking fijo (la bajada de
+   bandera pesa distinto según cuánto cargues).
    ============================================================ */
 
 const C = {
@@ -45,10 +33,26 @@ const sans = "'IBM Plex Sans', -apple-system, sans-serif";
 
 const fmt = (n) => new Intl.NumberFormat('es-UY', { maximumFractionDigits: 0 }).format(n);
 
-const TARIFAS = {
-  ac: { base: 54.8, kwh: 10.4, label: 'Corriente alterna · carga lenta' },
-  dc: { base: 132.9, kwh: 11.8, label: 'Corriente continua · carga rápida' },
-};
+/* Las 17 tarifas reales, recopiladas por autoelectrico.uy, jul 2026 */
+const TARIFAS = [
+  { operador: 'UTE', tipo: 'AC (lentos)', banda: 'Sin bandas', kwh: 10.40, base: 54.80 },
+  { operador: 'DISA', tipo: '—', banda: '00:00–07:00', kwh: 10.00, base: 120.00 },
+  { operador: 'UTE', tipo: 'CC (rápidos)', banda: 'Sin bandas', kwh: 11.80, base: 132.90 },
+  { operador: 'DISA', tipo: '—', banda: 'Resto del día', kwh: 12.00, base: 120.00 },
+  { operador: 'Mobility', tipo: 'CCS2', banda: 'Resto del día', kwh: 12.50, base: 130.00 },
+  { operador: 'UTE', tipo: 'CC predios privados', banda: 'Sin bandas', kwh: 11.80, base: 199.40 },
+  { operador: 'DMC', tipo: '—', banda: '17:00–24:00', kwh: 15.00, base: 0 },
+  { operador: 'DMC', tipo: '—', banda: '06:00–17:00', kwh: 16.00, base: 0 },
+  { operador: 'DISA', tipo: '—', banda: '18:00–22:00', kwh: 16.00, base: 120.00 },
+  { operador: 'DMC', tipo: '—', banda: '00:00–06:00', kwh: 18.00, base: 0 },
+  { operador: 'eOne', tipo: 'CCS2/GB-T', banda: 'Resto del día', kwh: 18.30, base: 0 },
+  { operador: 'Evergo', tipo: '—', banda: 'Sin bandas (dinámica)', kwh: 19.52, base: 122.00 },
+  { operador: 'Mobility', tipo: 'GB/T', banda: '00:00–07:00', kwh: 21.60, base: 130.00 },
+  { operador: 'eOne', tipo: 'CCS2/GB-T', banda: '18:00–23:00', kwh: 23.85, base: 0 },
+  { operador: 'Mobility', tipo: 'CCS2', banda: '18:00–22:00', kwh: 25.60, base: 130.00 },
+  { operador: 'Mobility', tipo: 'GB/T', banda: 'Resto del día', kwh: 26.40, base: 130.00 },
+  { operador: 'Mobility', tipo: 'GB/T', banda: '18:00–22:00', kwh: 30.00, base: 130.00 },
+];
 
 export default function CargaPublicaSimulator() {
   const [models, setModels] = useState([]);
@@ -59,10 +63,8 @@ export default function CargaPublicaSimulator() {
   const [batteryKwh, setBatteryKwh] = useState(60);
   const [socFrom, setSocFrom] = useState(20);
   const [socTo, setSocTo] = useState(80);
-  const [tipo, setTipo] = useState('dc');
-  const [baseFee, setBaseFee] = useState(TARIFAS.dc.base);
-  const [kwhPrice, setKwhPrice] = useState(TARIFAS.dc.kwh);
   const [tipoCambio, setTipoCambio] = useState(40.5);
+  const [selectedTarifa, setSelectedTarifa] = useState(''); // índice en TARIFAS, '' = sin elegir
 
   useEffect(() => {
     let cancelled = false;
@@ -87,17 +89,30 @@ export default function CargaPublicaSimulator() {
     if (selectedModel?.batteryKwh != null) setBatteryKwh(selectedModel.batteryKwh);
   }, [selectedModel]);
 
-  const cambiarTipo = (t) => {
-    setTipo(t);
-    setBaseFee(TARIFAS[t].base);
-    setKwhPrice(TARIFAS[t].kwh);
-  };
-
   const socRange = Math.max(socTo - socFrom, 0);
   const kwh = (batteryKwh * socRange) / 100;
-  const totalPesos = baseFee + kwh * kwhPrice;
-  const totalUsd = totalPesos / tipoCambio;
-  const costoPorKwh = kwh > 0 ? totalPesos / kwh : 0;
+
+  const ranking = useMemo(() => {
+    return TARIFAS
+      .map((t) => ({ ...t, costo: t.base + kwh * t.kwh }))
+      .sort((a, b) => a.costo - b.costo);
+  }, [kwh]);
+
+  const masBarato = ranking[0];
+  const masCaro = ranking[ranking.length - 1];
+
+  // Si el usuario eligió un operador puntual, calculamos su costo y
+  // cuánto se paga de más (o de menos) contra el más barato del país.
+  const elegido = useMemo(() => {
+    if (selectedTarifa === '') return null;
+    const t = TARIFAS[Number(selectedTarifa)];
+    if (!t) return null;
+    const costo = t.base + kwh * t.kwh;
+    const posicion = ranking.findIndex(
+      (r) => r.operador === t.operador && r.tipo === t.tipo && r.banda === t.banda
+    );
+    return { ...t, costo, posicion: posicion + 1, diferencia: costo - masBarato.costo };
+  }, [selectedTarifa, kwh, ranking, masBarato]);
 
   const selectStyle = S.input;
 
@@ -105,10 +120,9 @@ export default function CargaPublicaSimulator() {
     <div style={S.card}>
       <div style={S.head}>
         <div style={S.title}>Simulador de carga pública</div>
-        <div style={S.subtitle}>Red de UTE — el único operador con tarifa pública verificable en Uruguay hoy</div>
+        <div style={S.subtitle}>6 operadores — UTE, DISA, Mobility, DMC, eOne, Evergo</div>
       </div>
 
-      {/* Selector de vehículo */}
       <div style={S.field}>
         <label style={S.label}>Elegí tu vehículo (opcional)</label>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -135,74 +149,44 @@ export default function CargaPublicaSimulator() {
         {modelsError && <div style={S.errorNote}>No pudimos cargar el catálogo — completá la batería a mano abajo.</div>}
       </div>
 
-      {/* Batería + SOC */}
+      <div style={S.field}>
+        <label style={S.label}>Elegí dónde vas a cargar (opcional)</label>
+        <select
+          value={selectedTarifa}
+          onChange={(e) => setSelectedTarifa(e.target.value)}
+          style={selectStyle}
+        >
+          <option value="">Comparar todos los operadores…</option>
+          {TARIFAS.map((t, i) => (
+            <option key={i} value={i}>
+              {t.operador}
+              {t.tipo !== '—' ? ` · ${t.tipo}` : ''}
+              {t.banda !== 'Sin bandas' ? ` · ${t.banda}` : ''}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <div style={S.fieldsGrid}>
         <div style={S.field}>
           <label style={S.label}>Batería del auto</label>
           <div style={S.inputWrap}>
-            <input
-              type="number"
-              value={batteryKwh}
-              onChange={(e) => setBatteryKwh(Number(e.target.value) || 0)}
-              style={S.input}
-            />
+            <input type="number" value={batteryKwh} onChange={(e) => setBatteryKwh(Number(e.target.value) || 0)} style={S.input} />
             <span style={S.unit}>kWh</span>
           </div>
         </div>
         <div style={S.field}>
           <label style={S.label}>Desde (SOC actual)</label>
           <div style={S.inputWrap}>
-            <input
-              type="number" min="0" max="100"
-              value={socFrom}
-              onChange={(e) => setSocFrom(Math.min(Number(e.target.value) || 0, 100))}
-              style={S.input}
-            />
+            <input type="number" min="0" max="100" value={socFrom} onChange={(e) => setSocFrom(Math.min(Number(e.target.value) || 0, 100))} style={S.input} />
             <span style={S.unit}>%</span>
           </div>
         </div>
         <div style={S.field}>
           <label style={S.label}>Hasta (objetivo)</label>
           <div style={S.inputWrap}>
-            <input
-              type="number" min="0" max="100"
-              value={socTo}
-              onChange={(e) => setSocTo(Math.min(Number(e.target.value) || 0, 100))}
-              style={S.input}
-            />
+            <input type="number" min="0" max="100" value={socTo} onChange={(e) => setSocTo(Math.min(Number(e.target.value) || 0, 100))} style={S.input} />
             <span style={S.unit}>%</span>
-          </div>
-        </div>
-      </div>
-      <div style={S.socNote}>
-        Vas a cargar <strong style={{ color: C.real }}>{kwh.toFixed(1)} kWh</strong> ({socFrom}% → {socTo}% de {batteryKwh} kWh)
-      </div>
-
-      <div style={S.toggleRow}>
-        {['ac', 'dc'].map((t) => (
-          <button
-            key={t}
-            onClick={() => cambiarTipo(t)}
-            style={{ ...S.toggleBtn, ...(tipo === t ? S.toggleBtnActive : {}) }}
-          >
-            {TARIFAS[t].label}
-          </button>
-        ))}
-      </div>
-
-      <div style={S.fieldsGrid}>
-        <div style={S.field}>
-          <label style={S.label}>Cargo base ("bajada de bandera")</label>
-          <div style={S.inputWrap}>
-            <input type="number" step="0.1" value={baseFee} onChange={(e) => setBaseFee(Number(e.target.value) || 0)} style={S.input} />
-            <span style={S.unit}>$</span>
-          </div>
-        </div>
-        <div style={S.field}>
-          <label style={S.label}>Precio por kWh</label>
-          <div style={S.inputWrap}>
-            <input type="number" step="0.1" value={kwhPrice} onChange={(e) => setKwhPrice(Number(e.target.value) || 0)} style={S.input} />
-            <span style={S.unit}>$/kWh</span>
           </div>
         </div>
         <div style={S.field}>
@@ -213,24 +197,93 @@ export default function CargaPublicaSimulator() {
           </div>
         </div>
       </div>
-
-      <div style={S.resultCard}>
-        <div style={S.resultLabel}>Costo total de esta carga</div>
-        <div style={S.resultValue}>
-          ${fmt(totalPesos)} <span style={S.resultUsd}>· USD {totalUsd.toFixed(1)}</span>
-        </div>
-        <div style={S.resultBreakdown}>
-          ${fmt(baseFee)} de base + {kwh.toFixed(1)} kWh × ${kwhPrice} = ${fmt(totalPesos)}
-          {' '}(${costoPorKwh.toFixed(1)}/kWh efectivo)
-        </div>
+      <div style={S.socNote}>
+        Vas a cargar <strong style={{ color: C.real }}>{kwh.toFixed(1)} kWh</strong> ({socFrom}% → {socTo}% de {batteryKwh} kWh)
       </div>
 
+      {kwh > 0 && (
+        <>
+          {elegido ? (
+            <div style={S.bestCard}>
+              <div style={S.bestLabel}>Tu carga en {elegido.operador}</div>
+              <div style={S.bestValue}>
+                {elegido.operador} <span style={S.bestSub}>{elegido.tipo !== '—' ? elegido.tipo : ''} {elegido.banda}</span>
+              </div>
+              <div style={S.bestCosto}>
+                ${fmt(elegido.costo)} <span style={S.resultUsd}>· USD {(elegido.costo / tipoCambio).toFixed(1)}</span>
+              </div>
+              <div style={S.elegidoNota}>
+                Puesto {elegido.posicion} de {ranking.length} en precio.{' '}
+                {elegido.diferencia === 0 ? (
+                  <span style={{ color: C.real }}>Es la opción más barata para esta carga.</span>
+                ) : (
+                  <>
+                    Pagás <strong style={{ color: C.lab }}>${fmt(elegido.diferencia)} más</strong>{' '}
+                    que en {masBarato.operador}
+                    {masBarato.tipo !== '—' ? ` ${masBarato.tipo}` : ''}
+                    {masBarato.banda !== 'Sin bandas' ? ` (${masBarato.banda})` : ''}.
+                  </>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div style={S.bestCard}>
+              <div style={S.bestLabel}>Más barato para esta carga</div>
+              <div style={S.bestValue}>
+                {masBarato.operador} <span style={S.bestSub}>{masBarato.tipo !== '—' ? masBarato.tipo : ''} {masBarato.banda}</span>
+              </div>
+              <div style={S.bestCosto}>
+                ${fmt(masBarato.costo)} <span style={S.resultUsd}>· USD {(masBarato.costo / tipoCambio).toFixed(1)}</span>
+              </div>
+            </div>
+          )}
+
+          <div style={S.tableWrap}>
+            <table style={S.table}>
+              <thead>
+                <tr>
+                  <th style={S.th}>Operador</th>
+                  <th style={S.th}>Tipo / conector</th>
+                  <th style={S.th}>Banda</th>
+                  <th style={S.th}>$/kWh</th>
+                  <th style={S.th}>Bajada</th>
+                  <th style={S.th}>Costo total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ranking.map((t, i) => {
+                  const esElegido = elegido
+                    && t.operador === elegido.operador
+                    && t.tipo === elegido.tipo
+                    && t.banda === elegido.banda;
+                  return (
+                  <tr key={i} style={esElegido ? S.rowPicked : (i === 0 ? S.rowBest : undefined)}>
+                    <td style={{ ...S.td, ...(i === 0 ? { color: C.real, fontWeight: 600 } : {}) }}>{t.operador}</td>
+                    <td style={S.td}>{t.tipo}</td>
+                    <td style={S.td}>{t.banda}</td>
+                    <td style={{ ...S.td, ...S.tdMono }}>${t.kwh.toFixed(2)}</td>
+                    <td style={{ ...S.td, ...S.tdMono }}>${fmt(t.base)}</td>
+                    <td style={{ ...S.td, ...S.tdMono, ...(i === 0 ? { color: C.real, fontWeight: 600 } : {}) }}>${fmt(t.costo)}</td>
+                  </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p style={S.rangeNote}>
+            Para esta carga, la diferencia entre la opción más barata (
+            {masBarato.operador}) y la más cara ({masCaro.operador}) es de{' '}
+            <strong style={{ color: C.text }}>${fmt(masCaro.costo - masBarato.costo)}</strong>.
+          </p>
+        </>
+      )}
+
       <p style={S.note}>
-        Después de 20 minutos conectado sin estar cargando, UTE suma un cargo
-        extra por tiempo — no lo simulamos porque no encontramos un monto
-        público confirmado. Precios de la resolución de enero 2026; UTE ya
-        avisó que iba a seguir ajustando durante el año, así que cambiá los
-        números de arriba si tenés uno más actual.
+        Tarifas recopiladas por autoelectrico.uy a partir de lo publicado por
+        cada operador, julio 2026. UTE suma además un cargo por minuto si el
+        auto queda conectado sin cargar (no incluido acá). Las tarifas se
+        revisan seguido — confirmá el precio vigente en la app de cada
+        operador antes de un viaje largo.
       </p>
     </div>
   );
@@ -246,7 +299,7 @@ const S = {
   subtitle: { fontSize: 12, color: C.dim, marginTop: 3, fontFamily: mono },
   field: { display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16 },
   fieldsGrid: {
-    display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+    display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
     gap: 12, marginBottom: 8,
   },
   label: { fontFamily: mono, fontSize: 10.5, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.04em' },
@@ -262,20 +315,23 @@ const S = {
   },
   errorNote: { fontSize: 11.5, color: C.lab, marginTop: 6, fontFamily: mono },
   socNote: { fontSize: 13, color: C.dim, marginBottom: 18, fontFamily: sans },
-  toggleRow: { display: 'flex', gap: 8, marginBottom: 18, flexWrap: 'wrap' },
-  toggleBtn: {
-    fontFamily: mono, fontSize: 12.5, padding: '9px 14px',
-    background: 'transparent', color: C.dim, border: `1px solid ${C.line}`,
-    borderRadius: 20, cursor: 'pointer',
-  },
-  toggleBtnActive: { background: C.real, color: C.bg, borderColor: C.real, fontWeight: 600 },
-  resultCard: {
+  bestCard: {
     background: C.bg, border: `1px solid ${C.real}`, borderRadius: 6,
-    padding: '18px 20px', marginBottom: 14,
+    padding: '16px 18px', marginBottom: 16,
   },
-  resultLabel: { fontFamily: mono, fontSize: 10.5, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 },
-  resultValue: { fontFamily: mono, fontSize: 28, fontWeight: 600, color: C.real },
-  resultUsd: { fontSize: 14, color: C.dim, fontWeight: 400 },
-  resultBreakdown: { fontFamily: mono, fontSize: 11.5, color: C.faint, marginTop: 8 },
+  bestLabel: { fontFamily: mono, fontSize: 10.5, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 },
+  bestValue: { fontSize: 16, fontWeight: 600, color: C.text, marginBottom: 6 },
+  bestSub: { fontSize: 12.5, color: C.dim, fontWeight: 400, fontFamily: mono },
+  bestCosto: { fontFamily: mono, fontSize: 24, fontWeight: 600, color: C.real },
+  resultUsd: { fontSize: 13, color: C.dim, fontWeight: 400 },
+  tableWrap: { overflowX: 'auto', marginBottom: 10 },
+  table: { width: '100%', borderCollapse: 'collapse', minWidth: 520 },
+  th: { textAlign: 'left', fontFamily: mono, fontSize: 10, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.04em', padding: '8px 10px', borderBottom: `1px solid ${C.line}`, whiteSpace: 'nowrap' },
+  td: { padding: '9px 10px', fontSize: 12.5, borderBottom: `1px solid ${C.line}`, whiteSpace: 'nowrap' },
+  tdMono: { fontFamily: mono },
+  rowBest: { background: 'rgba(61,220,151,0.06)' },
+  rowPicked: { background: 'rgba(232,163,61,0.10)', outline: `1px solid ${C.lab}` },
+  elegidoNota: { fontSize: 12.5, color: C.dim, marginTop: 10, lineHeight: 1.6 },
+  rangeNote: { fontSize: 12.5, color: C.dim, margin: '0 0 14px', lineHeight: 1.6 },
   note: { fontSize: 12, color: C.faint, lineHeight: 1.6, margin: 0 },
 };
