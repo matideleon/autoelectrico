@@ -84,14 +84,14 @@ export default function CargaPage() {
 
           {/* Selector de las dos secciones */}
           <div style={S.tabs}>
-            <div style={S.tabActive}>En casa</div>
-            <div style={S.tabDisabled}>En la calle · próximamente</div>
+            <a href="#en-casa" style={S.tabActive}>En casa</a>
+            <a href="#en-la-calle" style={S.tabActive}>En la calle</a>
           </div>
 
           {/* ============ SECCIÓN: EN CASA ============ */}
 
           <section style={S.section}>
-            <h2 style={S.h2}>Lo primero: enchufe común o wallbox</h2>
+            <h2 id="en-casa" style={S.h2}>Lo primero: enchufe común o wallbox</h2>
             <p style={S.p}>
               Técnicamente podés cargar desde cualquier toma de 230V con el
               cable que trae el auto — es lo que se llama carga en modo 2, y
@@ -308,7 +308,7 @@ export default function CargaPage() {
           {/* ============ SECCIÓN: EN LA CALLE ============ */}
 
           <section style={S.section}>
-            <h2 style={S.h2}>Carga pública</h2>
+            <h2 id="en-la-calle" style={S.h2}>Carga pública</h2>
             <p style={S.p}>
               UTE opera más de 400 puntos de carga en los 19 departamentos,
               incluyendo varias estaciones ANCAP del interior — esos
@@ -380,9 +380,6 @@ const S: Record<string, React.CSSProperties> = {
   tabActive: {
     fontFamily: mono, fontSize: 13, color: C.real, padding: '10px 4px',
     borderBottom: `2px solid ${C.real}`, fontWeight: 600,
-  },
-  tabDisabled: {
-    fontFamily: mono, fontSize: 13, color: C.faint, padding: '10px 4px',
   },
   section: { marginTop: 32, paddingTop: 28, borderTop: `1px solid ${C.line}` },
   highlightSection: { background: C.surface, border: `1px solid ${C.line}`, borderRadius: 6, padding: '24px 24px 20px', borderTop: `1px solid ${C.line}` },
