@@ -28,6 +28,13 @@ const sans = "'IBM Plex Sans', -apple-system, sans-serif";
 /* Agregar artículos nuevos acá arriba (más reciente primero). */
 const ARTICLES = [
   {
+    slug: 'byd-supera-tesla-bateria-estado-solido',
+    category: 'Panorama · El mundo',
+    title: 'BYD le saca distancia a Tesla, y la batería de estado sólido se acerca a la vidriera',
+    dek: 'BYD vendió 557.090 eléctricos contra 480.126 de Tesla en el Q2 2026 — casi 77.000 de diferencia. Y la carga en 5 minutos empieza a dejar de ser una promesa de laboratorio.',
+    date: '2026-07-26',
+  },
+  {
     slug: 'efecto-tesla-byd',
     category: 'Análisis · Precios',
     title: '¿Efecto Tesla? BYD bajó precio a tres modelos justo esta semana',
