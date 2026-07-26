@@ -41,7 +41,7 @@ export default function Nav() {
         }
       `}</style>
 
-      <nav className="lg-bar" style={S.nav}>
+      <nav style={S.nav}>
         <a href="/" style={S.logoLink}>
           <img
             src="/logo-icon.png"
