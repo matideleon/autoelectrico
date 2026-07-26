@@ -1,11 +1,18 @@
 'use client';
 
 import React, { useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 /* ============================================================
    autoelectrico.uy — Navegación
 
-   Header fijo, mínimo. Tres destinos: modelos, comparador, home.
+   Rediseño con ícono arriba de la etiqueta, en una barra tipo
+   píldora — el ítem activo se resalta con fondo redondeado y
+   color de acento, detectado con usePathname (no adivinado por
+   estado local, así funciona bien con navegación directa por URL).
+
+   Los íconos son SVG propios, trazo simple, sin depender de
+   ninguna librería de íconos externa.
    ============================================================ */
 
 const C = {
@@ -19,53 +26,128 @@ const C = {
 
 const mono = "'IBM Plex Mono', ui-monospace, Menlo, monospace";
 
+/* ---------- Íconos ---------- */
+
+function IconHome({ color }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 11.5 12 4l9 7.5" />
+      <path d="M5.5 10v9a1 1 0 0 0 1 1H9v-5.5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1V20h2.5a1 1 0 0 0 1-1v-9" />
+    </svg>
+  );
+}
+
+function IconCar({ color }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 16v-3.2a2 2 0 0 1 .3-1.05l1.9-3.1A2 2 0 0 1 7.9 7.6h8.2a2 2 0 0 1 1.7 1.05l1.9 3.1a2 2 0 0 1 .3 1.05V16" />
+      <path d="M3.5 16h17v2a1 1 0 0 1-1 1H16a1 1 0 0 1-1-1v-1H9v1a1 1 0 0 1-1 1H4.5a1 1 0 0 1-1-1v-2Z" />
+      <circle cx="7.5" cy="16" r="1.4" />
+      <circle cx="16.5" cy="16" r="1.4" />
+    </svg>
+  );
+}
+
+function IconCompare({ color }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3.5" y="6" width="8" height="4.5" rx="2.25" />
+      <circle cx="7.75" cy="8.25" r="1.1" fill={color} stroke="none" />
+      <rect x="12.5" y="13.5" width="8" height="4.5" rx="2.25" />
+      <circle cx="16.75" cy="15.75" r="1.1" fill={color} stroke="none" />
+    </svg>
+  );
+}
+
+function IconSavings({ color }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="8" />
+      <path d="M12 7.5v9M14.5 9.7c0-1-1-1.7-2.5-1.7s-2.5.8-2.5 1.8c0 2.4 5 1.1 5 3.5 0 1-1 1.8-2.5 1.8s-2.5-.7-2.5-1.7" />
+    </svg>
+  );
+}
+
+function IconCharge({ color }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M13 3 4.5 13.5H11L10 21l8.5-10.5H12L13 3Z" />
+    </svg>
+  );
+}
+
+function IconNews({ color }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4.5 5.5h12a1.5 1.5 0 0 1 1.5 1.5v11a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18V5.5Z" />
+      <path d="M18 8.5h1a1 1 0 0 1 1 1V17a2 2 0 0 1-2 2" />
+      <path d="M7 9h6M7 12.2h6M7 15.4h3.5" />
+    </svg>
+  );
+}
+
+const NAV_ITEMS = [
+  { href: '/', label: 'Inicio', Icon: IconHome, exact: true },
+  { href: '/noticias', label: 'Noticias', Icon: IconNews },
+  { href: '/modelos', label: 'Modelos', Icon: IconCar },
+  { href: '/comparar', label: 'Comparar', Icon: IconCompare },
+  { href: '/ahorro', label: 'Ahorro', Icon: IconSavings },
+  { href: '/carga', label: 'Carga', Icon: IconCharge },
+];
+
 export default function Nav() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname() ?? '/';
 
-  const links = [
-    { href: '/modelos', label: 'Modelos' },
-    { href: '/comparar', label: 'Comparar' },
-    { href: '/ahorro', label: 'Ahorro' },
-    { href: '/carga', label: 'Carga' },
-  ];
+  const isActive = (item) =>
+    item.exact ? pathname === item.href : pathname.startsWith(item.href);
 
   return (
     <>
       <style>{`
-        .nav-link { transition: color 140ms ease; }
-        .nav-link:hover { color: ${C.bg} !important; background: ${C.real} !important; border-color: ${C.real} !important; }
+        .nav-item { transition: background 140ms ease, color 140ms ease; }
+        .nav-item:hover:not(.nav-item-active) { background: ${C.line} !important; }
         .nav-burger { display: none; }
-        @media (max-width: 560px) {
-          .nav-links-desktop { display: none !important; }
-          .nav-burger { display: block !important; }
+        @media (max-width: 640px) {
+          .nav-items-desktop { display: none !important; }
+          .nav-burger { display: flex !important; }
         }
       `}</style>
 
-      <nav style={S.nav}>
+      <nav className="lg-bar" style={S.nav}>
         <a href="/" style={S.logoLink}>
           <img
             src="/logo-icon.png"
             alt="autoelectrico.uy"
             style={S.logoImg}
-            width={32}
-            height={25}
+            width={28}
+            height={22}
           />
           <span style={S.logoText}>
             autoelectrico<span style={{ color: C.real }}>.uy</span>
           </span>
         </a>
 
-        <div className="nav-links-desktop" style={S.linksBox}>
-          {links.map((l) => (
-            <a key={l.href} href={l.href} className="nav-link" style={S.link}>
-              {l.label}
-            </a>
-          ))}
+        <div className="nav-items-desktop" style={S.pill}>
+          {NAV_ITEMS.map((item) => {
+            const active = isActive(item);
+            return (
+              <a
+                key={item.href}
+                href={item.href}
+                className={`nav-item${active ? ' nav-item-active' : ''}`}
+                style={{
+                  ...S.item,
+                  ...(active ? S.itemActive : {}),
+                }}
+              >
+                <item.Icon color={active ? C.real : C.dim} />
+                <span style={{ color: active ? C.real : C.dim }}>{item.label}</span>
+              </a>
+            );
+          })}
         </div>
 
-        {/* La columna derecha (1fr) reserva su espacio sola, aunque
-            el botón esté display:none en desktop — así la caja de
-            links del medio queda centrada de verdad en los dos casos. */}
         <button
           className="nav-burger"
           style={S.burger}
@@ -79,11 +161,19 @@ export default function Nav() {
 
       {open && (
         <div style={S.mobileMenu}>
-          {links.map((l) => (
-            <a key={l.href} href={l.href} className="nav-link" style={S.mobileLink}>
-              {l.label}
-            </a>
-          ))}
+          {NAV_ITEMS.map((item) => {
+            const active = isActive(item);
+            return (
+              <a
+                key={item.href}
+                href={item.href}
+                style={{ ...S.mobileLink, color: active ? C.real : C.dim }}
+              >
+                <item.Icon color={active ? C.real : C.dim} />
+                {item.label}
+              </a>
+            );
+          })}
         </div>
       )}
     </>
@@ -99,7 +189,7 @@ const S = {
     gridTemplateColumns: '1fr auto 1fr',
     alignItems: 'center',
     gap: 12,
-    padding: '12px 20px',
+    padding: '10px 20px',
     background: 'rgba(20,22,25,0.92)',
     backdropFilter: 'blur(8px)',
     borderBottom: `1px solid ${C.line}`,
@@ -111,33 +201,36 @@ const S = {
     gap: 9,
     textDecoration: 'none',
   },
-  logoImg: {
-    display: 'block',
-  },
+  logoImg: { display: 'block' },
   logoText: {
     fontSize: 14,
     fontWeight: 500,
     color: C.text,
     letterSpacing: '0.02em',
   },
-  linksBox: {
+  pill: {
     display: 'flex',
-    gap: 4,
+    gap: 2,
     alignItems: 'center',
     background: C.surface,
     border: `1px solid ${C.line}`,
-    borderRadius: 8,
+    borderRadius: 16,
     padding: 5,
   },
-  link: {
-    fontSize: 13,
-    fontWeight: 500,
-    color: C.text,
+  item: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 3,
+    padding: '8px 14px',
+    borderRadius: 12,
     textDecoration: 'none',
-    letterSpacing: '0.03em',
-    padding: '6px 14px',
-    borderRadius: 5,
-    border: '1px solid transparent',
+    fontSize: 10.5,
+    fontWeight: 600,
+    letterSpacing: '0.01em',
+  },
+  itemActive: {
+    background: 'rgba(61,220,151,0.10)',
   },
   burger: {
     justifySelf: 'end',
@@ -159,9 +252,11 @@ const S = {
     fontFamily: mono,
   },
   mobileLink: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
     padding: '14px 20px',
     fontSize: 13,
-    color: C.dim,
     textDecoration: 'none',
     borderBottom: `1px solid ${C.line}`,
   },
