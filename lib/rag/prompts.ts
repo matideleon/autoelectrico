@@ -96,7 +96,21 @@ function formatModel(m: Partial<Model>, idx: number): string {
   field('Carga DC', m.charge_dc_kw, ' kW');
   field('Conector DC', m.connector_dc);
   field('Potencia', m.power_hp, ' HP');
+  field('Torque', m.torque_nm, ' Nm');
+  field('Aceleración 0-100 km/h', m.accel_0_100_s, ' s');
+  field('Velocidad máxima', m.top_speed_kmh, ' km/h');
+
+  const traccion: Record<string, string> = { fwd: 'delantera (FWD)', rwd: 'trasera (RWD)', awd: 'integral (AWD)' };
+  field('Tracción', m.drivetrain ? (traccion[m.drivetrain] ?? m.drivetrain) : null);
+
+  const quimica: Record<string, string> = { lfp: 'LFP (litio-ferrofosfato)', nmc: 'NMC', nca: 'NCA' };
+  field('Química de batería', m.battery_chemistry ? (quimica[m.battery_chemistry] ?? m.battery_chemistry) : null);
+
   field('Plazas', m.seats);
+  field('Baúl', m.trunk_l, ' L');
+  field('Frunk (baúl delantero)', m.frunk_l, ' L');
+  field('Peso', m.weight_kg, ' kg');
+  field('Largo', m.length_mm, ' mm');
   field('Garantía batería', m.warranty_battery);
   field('Importador en Uruguay', m.importer);
 

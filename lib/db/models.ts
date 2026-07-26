@@ -12,10 +12,11 @@ import { TIER1_REQUIRED } from './types';
 const LIST_COLS = `
   m.id, m.slug, m.brand, m.model, m.variant, m.year_from, m.body, m.status,
   m.price_usd, m.price_source, m.price_updated_at,
-  m.battery_kwh, m.range_wltp_km, m.range_real_km, m.range_real_n, m.range_real_source,
+  m.battery_kwh, m.battery_chemistry, m.range_wltp_km, m.range_real_km, m.range_real_n, m.range_real_source,
   m.consumption_kwh_100,
   m.charge_ac_kw, m.charge_dc_kw, m.charge_10_80_min, m.connector_ac, m.connector_dc,
-  m.power_hp, m.seats, m.trunk_l,
+  m.power_hp, m.power_kw, m.torque_nm, m.accel_0_100_s, m.top_speed_kmh, m.drivetrain,
+  m.seats, m.trunk_l, m.frunk_l, m.weight_kg, m.length_mm,
   m.importer, m.warranty_vehicle, m.warranty_battery,
   m.summary, m.hero_image
 `;
