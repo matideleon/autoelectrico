@@ -30,7 +30,7 @@ const mono = "'IBM Plex Mono', ui-monospace, Menlo, monospace";
 
 function IconHome({ color }) {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 11.5 12 4l9 7.5" />
       <path d="M5.5 10v9a1 1 0 0 0 1 1H9v-5.5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1V20h2.5a1 1 0 0 0 1-1v-9" />
     </svg>
@@ -39,7 +39,7 @@ function IconHome({ color }) {
 
 function IconCar({ color }) {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M4 16v-3.2a2 2 0 0 1 .3-1.05l1.9-3.1A2 2 0 0 1 7.9 7.6h8.2a2 2 0 0 1 1.7 1.05l1.9 3.1a2 2 0 0 1 .3 1.05V16" />
       <path d="M3.5 16h17v2a1 1 0 0 1-1 1H16a1 1 0 0 1-1-1v-1H9v1a1 1 0 0 1-1 1H4.5a1 1 0 0 1-1-1v-2Z" />
       <circle cx="7.5" cy="16" r="1.4" />
@@ -50,7 +50,7 @@ function IconCar({ color }) {
 
 function IconCompare({ color }) {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3.5" y="6" width="8" height="4.5" rx="2.25" />
       <circle cx="7.75" cy="8.25" r="1.1" fill={color} stroke="none" />
       <rect x="12.5" y="13.5" width="8" height="4.5" rx="2.25" />
@@ -61,7 +61,7 @@ function IconCompare({ color }) {
 
 function IconSavings({ color }) {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="8" />
       <path d="M12 7.5v9M14.5 9.7c0-1-1-1.7-2.5-1.7s-2.5.8-2.5 1.8c0 2.4 5 1.1 5 3.5 0 1-1 1.8-2.5 1.8s-2.5-.7-2.5-1.7" />
     </svg>
@@ -70,7 +70,7 @@ function IconSavings({ color }) {
 
 function IconCharge({ color }) {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M13 3 4.5 13.5H11L10 21l8.5-10.5H12L13 3Z" />
     </svg>
   );
@@ -78,7 +78,7 @@ function IconCharge({ color }) {
 
 function IconNews({ color }) {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M4.5 5.5h12a1.5 1.5 0 0 1 1.5 1.5v11a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18V5.5Z" />
       <path d="M18 8.5h1a1 1 0 0 1 1 1V17a2 2 0 0 1-2 2" />
       <path d="M7 9h6M7 12.2h6M7 15.4h3.5" />
@@ -120,8 +120,8 @@ export default function Nav() {
             src="/logo-icon.png"
             alt="autoelectrico.uy"
             style={S.logoImg}
-            width={28}
-            height={22}
+            width={38}
+            height={30}
           />
           <span style={S.logoText}>
             autoelectrico<span style={{ color: C.real }}>.uy</span>
@@ -203,10 +203,10 @@ const S = {
   },
   logoImg: { display: 'block' },
   logoText: {
-    fontSize: 14,
-    fontWeight: 500,
+    fontSize: 17,
+    fontWeight: 600,
     color: C.text,
-    letterSpacing: '0.02em',
+    letterSpacing: '0.01em',
   },
   pill: {
     display: 'flex',
@@ -221,11 +221,11 @@ const S = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: 3,
-    padding: '8px 14px',
-    borderRadius: 12,
+    gap: 4,
+    padding: '11px 20px',
+    borderRadius: 14,
     textDecoration: 'none',
-    fontSize: 10.5,
+    fontSize: 11.5,
     fontWeight: 600,
     letterSpacing: '0.01em',
   },
