@@ -340,7 +340,7 @@ export default function Comparador({ models: dbModels }) {
                   </th>
                   {list.map((m) => (
                     <th key={m.slug} style={{ ...styles.th, width: `${70 / list.length}%` }} scope="col">
-                      <CarSilhouette body={m.body} size={isMobile ? 48 : 64} color="#565C66" />
+                      <CarSilhouette body={m.body} heroImage={m.hero_image} size={isMobile ? 48 : 64} color="#565C66" />
                       <div style={styles.thBrand}>{m.brand}</div>
                       <div style={styles.thModel}>{m.model}</div>
                     </th>

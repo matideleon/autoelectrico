@@ -1,18 +1,17 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 
 /* ============================================================
-   CarSilhouette — silueta SVG por tipo de carrocería.
+   CarSilhouette — imagen real del auto si existe, silueta SVG
+   por tipo de carrocería si no.
 
-   Como no tenemos fotos reales de cada modelo (hero_image está
-   vacío en casi todos), usamos siluetas monocromáticas por body
-   type: SUV, sedan, hatchback, pickup, van, coupe, wagon.
-   Mismo color tenue del sitio (#565C66), sin llenar de detalle
-   — es un ícono representativo, no una ilustración.
+   Prioridad: hero_image (URL real del fabricante) > silueta SVG
+   por body type > silueta genérica (sedan).
 
-   Si el modelo no tiene body cargado, muestra una silueta
-   genérica (sedan) en vez de nada.
+   Si la imagen real falla al cargar (URL rota, servidor caído),
+   cae automáticamente a la silueta — así nunca queda un hueco
+   blanco roto.
    ============================================================ */
 
 const PATHS = {
@@ -27,7 +26,7 @@ const PATHS = {
 
 const DEFAULT_BODY = 'sedan';
 
-export default function CarSilhouette({ body, size = 64, color = '#565C66' }) {
+function Silhouette({ body, size, color }) {
   const type = body && PATHS[body] ? body : DEFAULT_BODY;
   return (
     <svg
@@ -45,4 +44,27 @@ export default function CarSilhouette({ body, size = 64, color = '#565C66' }) {
       <path d={PATHS[type]} />
     </svg>
   );
+}
+
+export default function CarSilhouette({ body, heroImage, size = 64, color = '#565C66' }) {
+  const [imgError, setImgError] = useState(false);
+
+  if (heroImage && !imgError) {
+    return (
+      <img
+        src={heroImage}
+        alt=""
+        onError={() => setImgError(true)}
+        style={{
+          display: 'block',
+          margin: '0 auto 6px',
+          width: size * 1.4,
+          height: size * 0.7,
+          objectFit: 'contain',
+        }}
+      />
+    );
+  }
+
+  return <Silhouette body={body} size={size} color={color} />;
 }
