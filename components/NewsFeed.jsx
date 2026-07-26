@@ -1,14 +1,14 @@
 'use client';
 
 import React from 'react';
+import { ARTICLES } from '@/lib/articles';
 
 /* ============================================================
    NewsFeed — la portada del sitio.
 
-   Todavía no hay CMS: los artículos son páginas fijas en
-   /app/blog/*. Esta lista es manual a propósito — cuando haya
-   más de 6-8 artículos, vale la pena moverla a la base de datos.
-   Por ahora, agregar uno acá es una línea.
+   La lista de artículos vive en /lib/articles.js — este
+   componente y /app/noticias/page.tsx importan de ahí, así no
+   hay dos listas que se puedan desincronizar.
    ============================================================ */
 
 const C = {
@@ -24,38 +24,6 @@ const C = {
 
 const mono = "'IBM Plex Mono', ui-monospace, Menlo, monospace";
 const sans = "'IBM Plex Sans', -apple-system, sans-serif";
-
-/* Agregar artículos nuevos acá arriba (más reciente primero). */
-const ARTICLES = [
-  {
-    slug: 'byd-supera-tesla-bateria-estado-solido',
-    category: 'Panorama · El mundo',
-    title: 'BYD le saca distancia a Tesla, y la batería de estado sólido se acerca a la vidriera',
-    dek: 'BYD vendió 557.090 eléctricos contra 480.126 de Tesla en el Q2 2026 — casi 77.000 de diferencia. Y la carga en 5 minutos empieza a dejar de ser una promesa de laboratorio.',
-    date: '2026-07-26',
-  },
-  {
-    slug: 'efecto-tesla-byd',
-    category: 'Análisis · Precios',
-    title: '¿Efecto Tesla? BYD bajó precio a tres modelos justo esta semana',
-    dek: 'Yuan Pro GSX, Yuan Plus y Song Plus EV cuestan hoy entre 1.000 y 5.000 dólares menos. No podemos probar que Tesla lo causó — pero el timing invita a preguntarlo.',
-    date: '2026-07-23',
-  },
-  {
-    slug: 'tesla-impacto-mercado-uruguay',
-    category: 'Análisis · Mercado',
-    title: 'El impacto real de Tesla en el mercado eléctrico uruguayo',
-    dek: '200 personas dejaron seña en 24 horas. Pero el dato más grande es que Tesla rompe un esquema de venta que el resto de las marcas usa hace cien años.',
-    date: '2026-07-22',
-  },
-  {
-    slug: 'tesla-uruguay',
-    category: 'Noticias · Uruguay',
-    title: 'Tesla ya vende en Uruguay: precios, autonomía y el IMESI que se viene en 2027',
-    dek: 'Model 3 y Model Y se configuran online desde ya. Qué cuesta cada versión, y por qué la fecha en que compres puede pesar más que cualquier descuento.',
-    date: '2026-07-22',
-  },
-];
 
 function formatDate(iso) {
   return new Date(iso).toLocaleDateString('es-UY', {
@@ -103,6 +71,8 @@ export default function NewsFeed() {
             </div>
           )}
         </div>
+
+        <a href="/noticias" style={S.viewAllLink}>Ver todas las noticias →</a>
       </div>
     </section>
   );
@@ -181,6 +151,14 @@ const S = {
   },
   cardDate: { color: C.faint },
   cardRead: { color: C.real },
+  viewAllLink: {
+    display: 'inline-block',
+    marginTop: 20,
+    fontFamily: mono,
+    fontSize: 12.5,
+    color: C.real,
+    textDecoration: 'none',
+  },
 };
 
 const CSS = `
