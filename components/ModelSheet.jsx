@@ -235,7 +235,8 @@ function Spec({ label, value, unit, tone = 'real', note }) {
 }
 
 /* ---------- Patente ----------
-   Se calcula sobre el precio de venta, así que vive pegada a él.
+   Sale del precio de venta, pero se muestra al cerrar Autonomía:
+   ahí es donde el lector ya está pensando en costo de uso.
    Sin precio no hay patente: el hueco se muestra, no se rellena. */
 function PatenteRow({ m }) {
   const uyu = patenteAnualUyu(m.price_usd);
@@ -281,7 +282,6 @@ function PriceBlock({ m }) {
             {m.price_updated_at ? ` · actualizado ${new Date(m.price_updated_at).toLocaleDateString('es-UY')}` : ''}
             {' — varía por versión y promoción vigente.'}
           </div>
-          <PatenteRow m={m} />
         </>
       ) : (
         <>
@@ -400,6 +400,7 @@ export default function ModelSheet({ model }) {
             source={m.range_real_source}
             max={RANGE_SCALE}
           />
+          <PatenteRow m={m} />
         </section>
 
         {/* Carga */}
@@ -562,9 +563,11 @@ const S = {
     marginTop: 10,
   },
   patente: {
-    marginTop: 16,
-    paddingTop: 14,
-    borderTop: `1px solid ${C.line}`,
+    marginTop: 26,
+    padding: '16px 18px',
+    background: C.surface,
+    border: `1px solid ${C.line}`,
+    borderRadius: 3,
   },
   patenteTop: {
     display: 'flex',
