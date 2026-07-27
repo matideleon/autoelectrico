@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import ChatWidget from '@/components/ChatWidget';
+import AdCTA from '@/components/AdCTA';
 
 export const metadata: Metadata = {
   title: {
@@ -95,6 +96,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             para que no interfiera con el scroll ni los clics. */}
         <div aria-hidden="true" className="lg-bg" />
         {children}
+        <AdCTA />
         <ChatWidget />
       </body>
     </html>
