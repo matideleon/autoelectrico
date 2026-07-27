@@ -28,6 +28,7 @@ const NUMERIC_FIELDS = [
   'charge_dc_kw', 'charge_10_80_min', 'power_hp', 'power_kw', 'torque_nm',
   'accel_0_100_s', 'top_speed_kmh', 'seats', 'trunk_l', 'frunk_l',
   'weight_kg', 'length_mm', 'imesi_pct',
+  'range_ev_wltp_km', 'fuel_l_100', 'fuel_tank_l', 'range_total_km',
 ];
 
 /** pg devuelve numeric como string y Date como objeto: normalizar. */
