@@ -17,6 +17,19 @@ export type BuyerTimeframe = 'lt_3m' | '3_6m' | '6_12m' | 'browsing';
 export type SubStatus = 'pending' | 'confirmed' | 'unsubscribed' | 'bounced';
 export type ChargeSpeed = 'ac_slow' | 'ac_fast' | 'dc_fast' | 'dc_ultra';
 
+/**
+ * bev  eléctrico puro · phev enchufable · erev generador a bordo
+ * hev  híbrido que no enchufa · mhev micro-híbrido 48V
+ */
+export type Powertrain = 'bev' | 'phev' | 'erev' | 'hev' | 'mhev';
+
+/** Los que se enchufan. El resto no pertenece al catálogo. */
+export const PLUGGABLE: readonly Powertrain[] = ['bev', 'phev', 'erev'];
+
+export function isPluggable(p: Powertrain): boolean {
+  return PLUGGABLE.includes(p);
+}
+
 /** Usuario autenticado. `null` = visitante anónimo. */
 export interface Actor {
   id: string;
@@ -34,6 +47,7 @@ export interface Model {
   year_to: number | null;
   body: BodyType | null;
   status: ModelStatus;
+  powertrain: Powertrain;
 
   price_usd: number | null;
   price_source: string | null;
@@ -47,6 +61,13 @@ export interface Model {
   range_real_source: string | null;
   range_real_n: number | null;
   consumption_kwh_100: number | null;
+
+  /** Solo enchufables (phev/erev). En un bev el dato es range_wltp_km. */
+  range_ev_wltp_km: number | null;
+  /** Lado nafta. Siempre null en un bev, por CHECK en la base. */
+  fuel_l_100: number | null;
+  fuel_tank_l: number | null;
+  range_total_km: number | null;
 
   charge_ac_kw: number | null;
   charge_dc_kw: number | null;
