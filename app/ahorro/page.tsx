@@ -3,6 +3,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import SavingsChart from '@/components/SavingsChart';
 import Nav from '@/components/Nav';
+import {
+  patenteAnualUyu,
+  TASA_PATENTE_EV,
+  TASA_PATENTE_COMBUSTION,
+  TIPO_CAMBIO,
+} from '@/lib/patente';
 
 interface ModelOption {
   slug: string;
@@ -26,18 +32,12 @@ export default function AhorroPage() {
     triple: { label: 'Triple horario — horario barato', value: 2.443 * 1.22 },
   };
 
-  // Patente: se paga sobre el valor del vehículo sin IVA.
-  // Los eléctricos tributan al 3%; los de combustión, al 5%.
-  const TASA_PATENTE_EV = 0.03;
-  const TASA_PATENTE_COMBUSTION = 0.05;
-  const IVA = 1.22;
-
   const [tarifaUte, setTarifaUte] = useState<'doble' | 'triple'>('doble');
   const [precioKwh, setPrecioKwh] = useState(TARIFAS_UTE.doble.value);
   const [consumoElectrico, setConsumoElectrico] = useState(15.6);
   const [precioElectrico, setPrecioElectrico] = useState(0);
   const [precioCombustion, setPrecioCombustion] = useState(0);
-  const [tipoCambio, setTipoCambio] = useState(40.5);
+  const [tipoCambio, setTipoCambio] = useState(TIPO_CAMBIO);
 
   // --- Selector de vehículo: datos reales de nuestra base ---
   const [models, setModels] = useState<ModelOption[]>([]);
@@ -97,14 +97,14 @@ export default function AhorroPage() {
     (costoPorKmCombustion - costoPorKmElectrico) * kilometrosPorMes;
   const ahorroCombustibleAnual = ahorroCombustibleMensual * 12;
 
-  // Patente anual: se toma el precio de venta sin IVA (÷ 1,22), se le
-  // aplica la tasa que corresponda y se pasa a pesos al tipo de cambio.
-  // Solo entra en el ahorro si hay precio de los dos autos: comparar
-  // contra un precio en cero daría una diferencia inventada.
-  const patenteAnual = (precioUsd: number, tasa: number) =>
-    (precioUsd / IVA) * tasa * tipoCambio;
-  const patenteElectrico = patenteAnual(precioElectrico, TASA_PATENTE_EV);
-  const patenteCombustion = patenteAnual(precioCombustion, TASA_PATENTE_COMBUSTION);
+  // Patente anual: precio de venta sin IVA (÷ 1,22) × tasa, a pesos.
+  // Las tasas viven en lib/patente.ts, compartidas con la ficha de
+  // modelo. Solo entra en el ahorro si hay precio de los dos autos:
+  // comparar contra un precio en cero daría una diferencia inventada.
+  const patenteElectrico =
+    patenteAnualUyu(precioElectrico, TASA_PATENTE_EV, tipoCambio) ?? 0;
+  const patenteCombustion =
+    patenteAnualUyu(precioCombustion, TASA_PATENTE_COMBUSTION, tipoCambio) ?? 0;
   const hayPatente = precioElectrico > 0 && precioCombustion > 0;
   const ahorroPatenteAnual = hayPatente ? patenteCombustion - patenteElectrico : 0;
 
