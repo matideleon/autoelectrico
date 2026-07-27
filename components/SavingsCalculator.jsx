@@ -43,12 +43,6 @@ const DEFAULTS = {
   tipoCambio: 40.5,
 };
 
-/* Patente: se aplica sobre el valor del auto sin IVA.
-   Los eléctricos tributan al 3%; los de combustión, al 5%. */
-const TASA_PATENTE_EV = 0.03;
-const TASA_PATENTE_COMBUSTION = 0.05;
-const IVA = 1.22;
-
 const fmt = (n, d = 0) =>
   new Intl.NumberFormat('es-UY', { maximumFractionDigits: d, minimumFractionDigits: d }).format(n);
 
@@ -81,67 +75,32 @@ export default function SavingsCalculator() {
   const [precioKwh, setPrecioKwh] = useState(DEFAULTS.precioKwh);
   const [consumoEv, setConsumoEv] = useState(DEFAULTS.consumoEv);
   const [precioEvUsd, setPrecioEvUsd] = useState(DEFAULTS.precioEvUsd);
-  const [precioCombustionUsd, setPrecioCombustionUsd] = useState(DEFAULTS.precioCombustionUsd);
   const [tipoCambio, setTipoCambio] = useState(DEFAULTS.tipoCambio);
 
   const calc = useMemo(() => {
     const costoNaftaKm = precioNafta / rendimientoNafta;
     const costoEvKm = (precioKwh * consumoEv) / 100;
     const ahorroKm = costoNaftaKm - costoEvKm;
-    const ahorroCombustibleMensual = ahorroKm * km;
-    const ahorroCombustibleAnual = ahorroCombustibleMensual * 12;
-
-    /* Patente anual: se toma el precio de venta sin IVA (÷ 1.22),
-       se le aplica la tasa que corresponda y se pasa a pesos al
-       tipo de cambio. */
-    const patenteAnual = (precioUsd, tasa) => (precioUsd / IVA) * tasa * tipoCambio;
-
-    const patenteEv = patenteAnual(precioEvUsd, TASA_PATENTE_EV);
-    const patenteCombustion = patenteAnual(precioCombustionUsd, TASA_PATENTE_COMBUSTION);
-    const ahorroPatenteAnual = patenteCombustion - patenteEv;
-
-    const ahorroAnual = ahorroCombustibleAnual + ahorroPatenteAnual;
-    const ahorroMensual = ahorroAnual / 12;
+    const ahorroMensual = ahorroKm * km;
+    const ahorroAnual = ahorroMensual * 12;
 
     const precioEvUyu = precioEvUsd * tipoCambio;
-    const precioCombustionUyu = precioCombustionUsd * tipoCambio;
-    const sobreprecioUyu = precioEvUyu - precioCombustionUyu;
-
-    /* Amortizás la diferencia de precio contra el ahorro total.
-       Si el eléctrico ya sale igual o menos, no hay nada que amortizar. */
-    const paybackMeses =
-      sobreprecioUyu <= 0 ? 0 : ahorroMensual > 0 ? sobreprecioUyu / ahorroMensual : null;
+    const paybackMeses = ahorroMensual > 0 ? precioEvUyu / ahorroMensual : null;
 
     return {
       costoNaftaKm,
       costoEvKm,
       ahorroKm,
-      ahorroCombustibleMensual,
-      ahorroCombustibleAnual,
-      patenteEv,
-      patenteCombustion,
-      ahorroPatenteAnual,
       ahorroMensual,
       ahorroAnual,
       precioEvUyu,
-      precioCombustionUyu,
-      sobreprecioUyu,
       paybackMeses,
     };
-  }, [
-    km,
-    precioNafta,
-    rendimientoNafta,
-    precioKwh,
-    consumoEv,
-    precioEvUsd,
-    precioCombustionUsd,
-    tipoCambio,
-  ]);
+  }, [km, precioNafta, rendimientoNafta, precioKwh, consumoEv, precioEvUsd, tipoCambio]);
 
   const shareText = `Calculé mi ahorro pasándome a un eléctrico en autoelectrico.uy: ${
-    calc.ahorroAnual > 0
-      ? `ahorraría ${fmt(calc.ahorroAnual)} $/año entre combustible y patente`
+    calc.ahorroMensual > 0
+      ? `ahorraría ${fmt(calc.ahorroMensual)} $/mes en combustible`
       : 'lo calculé con mis propios números'
   }. Probalo vos:`;
 
@@ -190,13 +149,6 @@ export default function SavingsCalculator() {
               onChange={setRendimientoNafta}
               unit="km/L"
               step={0.5}
-            />
-            <Field
-              label="Precio de compra"
-              value={precioCombustionUsd}
-              onChange={setPrecioCombustionUsd}
-              unit="USD"
-              step={500}
             />
 
             <h2 style={{ ...S.panelTitle, marginTop: 24 }}>Auto eléctrico</h2>
@@ -254,84 +206,35 @@ export default function SavingsCalculator() {
               </div>
             </div>
 
-            <div style={S.resultCard}>
-              <div style={S.resultLabel}>Patente anual</div>
-              <div style={S.compareRow}>
-                <div>
-                  <div style={{ ...S.compareVal, color: C.lab }}>
-                    ${fmt(calc.patenteCombustion)}
-                  </div>
-                  <div style={S.compareTag}>combustión · 5%</div>
-                </div>
-                <div style={S.vs}>vs</div>
-                <div>
-                  <div style={{ ...S.compareVal, color: C.real }}>
-                    ${fmt(calc.patenteEv)}
-                  </div>
-                  <div style={S.compareTag}>eléctrico · 3%</div>
-                </div>
-              </div>
-              <div style={S.formula}>
-                Sobre el precio de venta sin IVA (÷ 1,22), al tipo de cambio. El
-                eléctrico tributa 3%; el combustión, 5%.
-              </div>
-            </div>
-
             <div
               style={{
                 ...S.resultCard,
-                borderColor: calc.ahorroAnual > 0 ? C.real : C.lab,
+                borderColor: calc.ahorroMensual > 0 ? C.real : C.lab,
               }}
             >
               <div style={S.resultLabel}>Ahorro con el eléctrico</div>
               <div
                 style={{
                   ...S.bigNumber,
-                  color: calc.ahorroAnual > 0 ? C.real : C.lab,
+                  color: calc.ahorroMensual > 0 ? C.real : C.lab,
                 }}
               >
-                {calc.ahorroAnual > 0 ? '' : '−'}${fmt(Math.abs(calc.ahorroAnual))}
-                <span style={S.bigUnit}> /año</span>
+                {calc.ahorroMensual > 0 ? '' : '−'}${fmt(Math.abs(calc.ahorroMensual))}
+                <span style={S.bigUnit}> /mes</span>
               </div>
               <div style={S.subNumber}>
-                {calc.ahorroMensual > 0 ? '' : '−'}${fmt(Math.abs(calc.ahorroMensual))} por mes
+                {calc.ahorroMensual > 0 ? '' : '−'}${fmt(Math.abs(calc.ahorroAnual))} al año
               </div>
-
-              <div style={S.breakdown}>
-                <div style={S.breakdownRow}>
-                  <span>Combustible</span>
-                  <span
-                    style={{
-                      color: calc.ahorroCombustibleAnual >= 0 ? C.real : C.lab,
-                    }}
-                  >
-                    {calc.ahorroCombustibleAnual >= 0 ? '+' : '−'}$
-                    {fmt(Math.abs(calc.ahorroCombustibleAnual))}
-                  </span>
-                </div>
-                <div style={S.breakdownRow}>
-                  <span>Patente</span>
-                  <span
-                    style={{
-                      color: calc.ahorroPatenteAnual >= 0 ? C.real : C.lab,
-                    }}
-                  >
-                    {calc.ahorroPatenteAnual >= 0 ? '+' : '−'}$
-                    {fmt(Math.abs(calc.ahorroPatenteAnual))}
-                  </span>
-                </div>
-              </div>
-
-              {calc.ahorroAnual <= 0 && (
+              {calc.ahorroMensual <= 0 && (
                 <div style={S.warning}>
-                  Con estos números el combustión sale más barato de mantener.
-                  Revisá tu consumo real de nafta y los precios de compra.
+                  Con estos números, el combustión sale más barato en
+                  combustible. Revisá tu consumo real de nafta.
                 </div>
               )}
             </div>
 
             <div style={S.resultCard}>
-              <div style={S.resultLabel}>Amortizás la diferencia de precio en</div>
+              <div style={S.resultLabel}>Amortizás el precio del eléctrico en</div>
               {calc.paybackMeses != null ? (
                 <>
                   <div style={S.bigNumber}>
@@ -341,17 +244,14 @@ export default function SavingsCalculator() {
                     {calc.paybackMeses >= 1 && <span style={S.bigUnit}> años</span>}
                   </div>
                   <div style={S.subNumber}>
-                    {calc.sobreprecioUyu > 0
-                      ? `el eléctrico sale $${fmt(calc.sobreprecioUyu)} más · $${fmt(
-                          precioEvUsd - precioCombustionUsd
-                        )} USD`
-                      : 'el eléctrico no sale más caro que el combustión'}
+                    precio del eléctrico: ${fmt(calc.precioEvUyu)} · $
+                    {fmt(precioEvUsd)} USD
                   </div>
                 </>
               ) : (
                 <div style={S.subNumber}>
-                  Con estos números no amortizás: mantener el eléctrico no sale
-                  más barato acá.
+                  Con estos números no amortizás: el combustible del
+                  eléctrico no sale más barato acá.
                 </div>
               )}
             </div>
@@ -364,11 +264,8 @@ export default function SavingsCalculator() {
 
         <footer style={S.foot}>
           Precio de nafta: ANCAP/URSEA, julio 2026. Tarifa UTE: Tarifa
-          Residencial Simple, tramo 101-600 kWh, abril 2026, con IVA. Patente:
-          sobre el valor del vehículo sin IVA (precio de venta ÷ 1,22),
-          convertido a pesos al tipo de cambio — 3% para eléctricos, 5% para
-          combustión. Las tasas y los aforos varían según la intendencia.
-          Ajustá los valores si tenés otra tarifa o el precio cambió.
+          Residencial Simple, tramo 101-600 kWh, abril 2026, con IVA. Ajustá
+          los valores si tenés otra tarifa o el precio cambió.
         </footer>
       </div>
     </div>
@@ -522,30 +419,6 @@ const S = {
     fontSize: 12,
     color: C.faint,
     marginTop: 6,
-  },
-  formula: {
-    fontFamily: mono,
-    fontSize: 10,
-    color: C.faint,
-    marginTop: 14,
-    paddingTop: 10,
-    borderTop: `1px solid ${C.line}`,
-    lineHeight: 1.5,
-  },
-  breakdown: {
-    marginTop: 14,
-    paddingTop: 12,
-    borderTop: `1px solid ${C.line}`,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 6,
-  },
-  breakdownRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    fontFamily: mono,
-    fontSize: 12,
-    color: C.dim,
   },
   warning: {
     fontSize: 12,
