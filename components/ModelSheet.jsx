@@ -1,6 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
+import {
+  patenteAnualUyu,
+  patenteAnualUsd,
+  TASA_PATENTE_COMBUSTION,
+  TIPO_CAMBIO,
+  TIPO_CAMBIO_FECHA,
+} from '@/lib/patente';
 
 /* ============================================================
    evuy — Ficha de modelo
@@ -227,6 +234,35 @@ function Spec({ label, value, unit, tone = 'real', note }) {
   );
 }
 
+/* ---------- Patente ----------
+   Se calcula sobre el precio de venta, así que vive pegada a él.
+   Sin precio no hay patente: el hueco se muestra, no se rellena. */
+function PatenteRow({ m }) {
+  const uyu = patenteAnualUyu(m.price_usd);
+  const usd = patenteAnualUsd(m.price_usd);
+  if (uyu == null) return null;
+
+  return (
+    <div style={S.patente}>
+      <div style={S.patenteTop}>
+        <span style={S.patenteLabel}>Patente anual estimada</span>
+        <span style={S.patenteValue}>
+          ${fmt(Math.round(uyu))}
+          <em style={S.patenteUsd}> · USD {fmt(Math.round(usd))}</em>
+        </span>
+      </div>
+      <div style={S.patenteFoot}>
+        3% sobre el valor sin IVA (USD {fmt(m.price_usd)} ÷ 1,22), a $
+        {String(TIPO_CAMBIO).replace('.', ',')}/USD de {TIPO_CAMBIO_FECHA}. Un
+        auto a combustión del mismo precio paga 5%: ${fmt(
+          Math.round(patenteAnualUyu(m.price_usd, TASA_PATENTE_COMBUSTION))
+        )}. Las tasas y los aforos los fija cada intendencia — esto es una
+        estimación, no la boleta.
+      </div>
+    </div>
+  );
+}
+
 /* ---------- Precio ---------- */
 function PriceBlock({ m }) {
   const hasPrice = m.price_usd != null;
@@ -245,6 +281,7 @@ function PriceBlock({ m }) {
             {m.price_updated_at ? ` · actualizado ${new Date(m.price_updated_at).toLocaleDateString('es-UY')}` : ''}
             {' — varía por versión y promoción vigente.'}
           </div>
+          <PatenteRow m={m} />
         </>
       ) : (
         <>
@@ -523,6 +560,45 @@ const S = {
     fontSize: 11,
     color: C.faint,
     marginTop: 10,
+  },
+  patente: {
+    marginTop: 16,
+    paddingTop: 14,
+    borderTop: `1px solid ${C.line}`,
+  },
+  patenteTop: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    gap: 12,
+    flexWrap: 'wrap',
+  },
+  patenteLabel: {
+    fontFamily: mono,
+    fontSize: 10,
+    color: C.dim,
+    textTransform: 'uppercase',
+    letterSpacing: '0.1em',
+  },
+  patenteValue: {
+    fontFamily: mono,
+    fontSize: 20,
+    fontWeight: 500,
+    color: C.text,
+    letterSpacing: '-0.01em',
+  },
+  patenteUsd: {
+    fontSize: 12,
+    color: C.dim,
+    fontStyle: 'normal',
+    fontWeight: 400,
+  },
+  patenteFoot: {
+    fontFamily: mono,
+    fontSize: 11,
+    color: C.faint,
+    marginTop: 8,
+    lineHeight: 1.6,
   },
   section: {
     marginBottom: 38,
