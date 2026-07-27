@@ -26,10 +26,17 @@ export default function AhorroPage() {
     triple: { label: 'Triple horario — horario barato', value: 2.443 * 1.22 },
   };
 
+  // Patente: se paga sobre el valor del vehículo sin IVA.
+  // Los eléctricos tributan al 3%; los de combustión, al 5%.
+  const TASA_PATENTE_EV = 0.03;
+  const TASA_PATENTE_COMBUSTION = 0.05;
+  const IVA = 1.22;
+
   const [tarifaUte, setTarifaUte] = useState<'doble' | 'triple'>('doble');
   const [precioKwh, setPrecioKwh] = useState(TARIFAS_UTE.doble.value);
   const [consumoElectrico, setConsumoElectrico] = useState(15.6);
   const [precioElectrico, setPrecioElectrico] = useState(0);
+  const [precioCombustion, setPrecioCombustion] = useState(0);
   const [tipoCambio, setTipoCambio] = useState(40.5);
 
   // --- Selector de vehículo: datos reales de nuestra base ---
@@ -86,8 +93,23 @@ export default function AhorroPage() {
   // Calculations
   const costoPorKmCombustion = consumoCombustion > 0 ? precioNafta / consumoCombustion : 0;
   const costoPorKmElectrico = (precioKwh * consumoElectrico) / 100;
-  const ahorroMensual = (costoPorKmCombustion - costoPorKmElectrico) * kilometrosPorMes;
-  const ahorroAnual = ahorroMensual * 12;
+  const ahorroCombustibleMensual =
+    (costoPorKmCombustion - costoPorKmElectrico) * kilometrosPorMes;
+  const ahorroCombustibleAnual = ahorroCombustibleMensual * 12;
+
+  // Patente anual: se toma el precio de venta sin IVA (÷ 1,22), se le
+  // aplica la tasa que corresponda y se pasa a pesos al tipo de cambio.
+  // Solo entra en el ahorro si hay precio de los dos autos: comparar
+  // contra un precio en cero daría una diferencia inventada.
+  const patenteAnual = (precioUsd: number, tasa: number) =>
+    (precioUsd / IVA) * tasa * tipoCambio;
+  const patenteElectrico = patenteAnual(precioElectrico, TASA_PATENTE_EV);
+  const patenteCombustion = patenteAnual(precioCombustion, TASA_PATENTE_COMBUSTION);
+  const hayPatente = precioElectrico > 0 && precioCombustion > 0;
+  const ahorroPatenteAnual = hayPatente ? patenteCombustion - patenteElectrico : 0;
+
+  const ahorroAnual = ahorroCombustibleAnual + ahorroPatenteAnual;
+  const ahorroMensual = ahorroAnual / 12;
 
   // El campo "precio de compra" está en USD (así lo dice la unidad
   // del input). El ahorro mensual está en pesos. Para la amortización
@@ -95,8 +117,18 @@ export default function AhorroPage() {
   // USD por UYU/mes daba un resultado sin sentido (meses en vez de
   // años). Este era un bug real: mezclaba monedas.
   const precioElectricoUYU = precioElectrico * tipoCambio;
+  const precioCombustionUYU = precioCombustion * tipoCambio;
+
+  // Si el usuario cargó el precio del combustión, lo que hay que
+  // amortizar es la diferencia entre los dos autos, no el precio
+  // entero del eléctrico. Sin ese dato, se cae al comportamiento
+  // anterior: el precio completo.
+  const baseAmortizacionUYU =
+    precioCombustion > 0 ? precioElectricoUYU - precioCombustionUYU : precioElectricoUYU;
   const amortizacionMeses =
-    ahorroMensual > 0 && precioElectrico > 0 ? precioElectricoUYU / ahorroMensual : null;
+    ahorroMensual > 0 && precioElectrico > 0 && baseAmortizacionUYU > 0
+      ? baseAmortizacionUYU / ahorroMensual
+      : null;
   const amortizacionAnios = amortizacionMeses != null ? amortizacionMeses / 12 : null;
 
   const handleShare = () => {
@@ -312,7 +344,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
               </div>
             </div>
 
-            <div>
+            <div style={{ marginBottom: '20px' }}>
               <label style={{
                 display: 'block',
                 fontSize: '14px',
@@ -348,6 +380,49 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                   fontSize: '14px'
                 }}>
                   km/L
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                color: '#ccc',
+                marginBottom: '4px'
+              }}>
+                Precio de compra
+              </label>
+              <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>
+                Opcional. Sirve para comparar la patente de los dos autos.
+              </div>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="number"
+                  value={precioCombustion === 0 ? '' : precioCombustion}
+                  onChange={(e) => setPrecioCombustion(Number(e.target.value) || 0)}
+                  placeholder="Ingresá el precio"
+                  style={{
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    background: '#141619',
+                    border: '1px solid #2a2d33',
+                    borderRadius: '4px',
+                    padding: '12px 50px 12px 12px',
+                    color: '#fff',
+                    fontSize: '16px',
+                    fontFamily: 'IBM Plex Mono, monospace'
+                  }}
+                />
+                <span style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: '#666',
+                  fontSize: '14px'
+                }}>
+                  USD
                 </span>
               </div>
             </div>
@@ -729,16 +804,90 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
             </div>
           </div>
 
-          {/* AHORRO CON EL ELÉCTRICO */}
+          {/* PATENTE ANUAL */}
           <div style={{
             background: '#1B1E23',
-            border: '2px solid #00d084',
+            border: '1px solid #2a2d33',
             borderRadius: '8px',
             padding: '24px'
           }}>
             <div style={{
               fontSize: '12px',
-              color: '#00d084',
+              color: '#666',
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+              marginBottom: '16px',
+              textAlign: 'center'
+            }}>
+              PATENTE ANUAL
+            </div>
+            {hayPatente ? (
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{
+                    fontSize: '24px',
+                    color: '#ff8c00',
+                    fontFamily: 'IBM Plex Mono, monospace',
+                    fontWeight: '500'
+                  }}>
+                    ${Math.round(patenteCombustion).toLocaleString()}
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                    combustión · 5%
+                  </div>
+                </div>
+                <div style={{ color: '#666', fontSize: '16px' }}>vs</div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{
+                    fontSize: '24px',
+                    color: '#00d084',
+                    fontFamily: 'IBM Plex Mono, monospace',
+                    fontWeight: '500'
+                  }}>
+                    ${Math.round(patenteElectrico).toLocaleString()}
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                    eléctrico · 3%
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div style={{
+                fontSize: '13px',
+                color: '#666',
+                textAlign: 'center',
+                lineHeight: '1.5'
+              }}>
+                Completá el precio de los dos autos para compararla.
+              </div>
+            )}
+            <div style={{
+              fontSize: '12px',
+              color: '#666',
+              lineHeight: '1.5',
+              marginTop: '16px',
+              paddingTop: '14px',
+              borderTop: '1px solid #2a2d33',
+              textAlign: 'center'
+            }}>
+              Sobre el precio de venta sin IVA (÷ 1,22), al tipo de cambio.
+            </div>
+          </div>
+
+          {/* AHORRO CON EL ELÉCTRICO */}
+          <div style={{
+            background: '#1B1E23',
+            border: `2px solid ${ahorroAnual > 0 ? '#00d084' : '#E8A33D'}`,
+            borderRadius: '8px',
+            padding: '24px'
+          }}>
+            <div style={{
+              fontSize: '12px',
+              color: ahorroAnual > 0 ? '#00d084' : '#E8A33D',
               textTransform: 'uppercase',
               letterSpacing: '1px',
               marginBottom: '16px',
@@ -749,7 +898,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
             <div style={{ textAlign: 'center' }}>
               <div style={{
                 fontSize: '32px',
-                color: '#00d084',
+                color: ahorroAnual > 0 ? '#00d084' : '#E8A33D',
                 fontFamily: 'IBM Plex Mono, monospace',
                 fontWeight: '500',
                 marginBottom: '4px'
@@ -758,7 +907,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
               </div>
               <div style={{
                 fontSize: '14px',
-                color: '#00d084',
+                color: ahorroAnual > 0 ? '#00d084' : '#E8A33D',
                 marginBottom: '8px'
               }}>
                 /mes
@@ -770,6 +919,35 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                 ${Math.round(ahorroAnual).toLocaleString()} al año
               </div>
             </div>
+
+            {hayPatente && (
+              <div style={{
+                marginTop: '18px',
+                paddingTop: '14px',
+                borderTop: '1px solid #2a2d33',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+                fontFamily: 'IBM Plex Mono, monospace',
+                fontSize: '13px',
+                color: '#aaa'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Combustible</span>
+                  <span style={{ color: ahorroCombustibleAnual >= 0 ? '#00d084' : '#E8A33D' }}>
+                    {ahorroCombustibleAnual >= 0 ? '+' : '−'}$
+                    {Math.round(Math.abs(ahorroCombustibleAnual)).toLocaleString()}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Patente</span>
+                  <span style={{ color: ahorroPatenteAnual >= 0 ? '#00d084' : '#E8A33D' }}>
+                    {ahorroPatenteAnual >= 0 ? '+' : '−'}$
+                    {Math.round(Math.abs(ahorroPatenteAnual)).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* AMORTIZÁS EL PRECIO DEL ELÉCTRICO EN */}
@@ -787,7 +965,9 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
               marginBottom: '16px',
               textAlign: 'center'
             }}>
-              AMORTIZÁS EL PRECIO DEL ELÉCTRICO EN
+              {precioCombustion > 0
+                ? 'AMORTIZÁS LA DIFERENCIA DE PRECIO EN'
+                : 'AMORTIZÁS EL PRECIO DEL ELÉCTRICO EN'}
             </div>
             <div style={{ textAlign: 'center' }}>
               <div style={{
@@ -808,21 +988,29 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                 color: '#666',
                 marginBottom: '16px'
               }}>
-                {amortizacionAnios != null ? 'años' : precioElectrico <= 0 ? 'completá el precio arriba' : 'sin ahorro mensual'}
+                {amortizacionAnios != null
+                  ? 'años'
+                  : precioElectrico <= 0
+                    ? 'completá el precio arriba'
+                    : baseAmortizacionUYU <= 0
+                      ? 'el eléctrico no sale más caro'
+                      : 'sin ahorro mensual'}
               </div>
               <div style={{
                 fontSize: '12px',
                 color: '#666',
                 lineHeight: '1.4'
               }}>
-                precio del eléctrico: ${Math.round(precioElectricoUYU).toLocaleString()} · ${precioElectrico.toLocaleString()} USD
+                {precioCombustion > 0 && baseAmortizacionUYU > 0
+                  ? <>diferencia: ${Math.round(baseAmortizacionUYU).toLocaleString()} · ${(precioElectrico - precioCombustion).toLocaleString()} USD</>
+                  : <>precio del eléctrico: ${Math.round(precioElectricoUYU).toLocaleString()} · ${precioElectrico.toLocaleString()} USD</>}
               </div>
             </div>
           </div>
 
           <SavingsChart
             monthlySavings={ahorroMensual}
-            priceUYU={precioElectricoUYU}
+            priceUYU={baseAmortizacionUYU}
             amortizacionMeses={amortizacionMeses}
           />
 
@@ -857,7 +1045,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
         fontSize: '14px',
         lineHeight: '1.5'
       }}>
-        Precio de nafta: ANCAP/URSEA, julio 2026. Tarifa UTE: horario barato del Plan Inteligente (doble o triple horario) con IVA incluido. Autonomía y consumo eléctrico: catálogo de autoelectrico.uy. Ajustá los valores si tenés otra tarifa o el precio cambió.
+        Precio de nafta: ANCAP/URSEA, julio 2026. Tarifa UTE: horario barato del Plan Inteligente (doble o triple horario) con IVA incluido. Autonomía y consumo eléctrico: catálogo de autoelectrico.uy. Patente: sobre el valor del vehículo sin IVA (precio de venta ÷ 1,22), convertido a pesos al tipo de cambio — 3% para eléctricos, 5% para combustión; las tasas y los aforos varían según la intendencia. Ajustá los valores si tenés otra tarifa o el precio cambió.
       </footer>
     </div>
   );
