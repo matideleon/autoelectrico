@@ -23,8 +23,8 @@ const C = {
   surface: '#1B1E23',
   line: '#2A2E35',
   text: '#E6E8EB',
-  dim: '#8A9099',
-  faint: '#565C66',
+  dim: '#9AA1AC',
+  faint: '#828993',
   real: '#3DDC97',
   lab: '#E8A33D',
 };
@@ -126,7 +126,7 @@ export default function CargaPublicaSimulator() {
       <div style={S.field}>
         <label style={S.label}>Elegí tu vehículo (opcional)</label>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          <select
+          <select aria-label="Marca del vehículo"
             value={selectedBrand}
             onChange={(e) => { setSelectedBrand(e.target.value); setSelectedSlug(''); }}
             style={selectStyle}
@@ -135,6 +135,7 @@ export default function CargaPublicaSimulator() {
             {brands.map((b) => <option key={b} value={b}>{b}</option>)}
           </select>
           <select
+            aria-label="Modelo del vehículo"
             value={selectedSlug}
             onChange={(e) => setSelectedSlug(e.target.value)}
             disabled={!selectedBrand}
@@ -151,7 +152,7 @@ export default function CargaPublicaSimulator() {
 
       <div style={S.field}>
         <label style={S.label}>Elegí dónde vas a cargar (opcional)</label>
-        <select
+        <select aria-label="Elegí dónde vas a cargar (opcional)"
           value={selectedTarifa}
           onChange={(e) => setSelectedTarifa(e.target.value)}
           style={selectStyle}
@@ -171,28 +172,28 @@ export default function CargaPublicaSimulator() {
         <div style={S.field}>
           <label style={S.label}>Batería del auto</label>
           <div style={S.inputWrap}>
-            <input type="number" value={batteryKwh} onChange={(e) => setBatteryKwh(Number(e.target.value) || 0)} style={S.input} />
+            <input aria-label="Batería del auto" type="number" value={batteryKwh} onChange={(e) => setBatteryKwh(Number(e.target.value) || 0)} style={S.input} />
             <span style={S.unit}>kWh</span>
           </div>
         </div>
         <div style={S.field}>
           <label style={S.label}>Desde (SOC actual)</label>
           <div style={S.inputWrap}>
-            <input type="number" min="0" max="100" value={socFrom} onChange={(e) => setSocFrom(Math.min(Number(e.target.value) || 0, 100))} style={S.input} />
+            <input aria-label="Desde (SOC actual)" type="number" min="0" max="100" value={socFrom} onChange={(e) => setSocFrom(Math.min(Number(e.target.value) || 0, 100))} style={S.input} />
             <span style={S.unit}>%</span>
           </div>
         </div>
         <div style={S.field}>
           <label style={S.label}>Hasta (objetivo)</label>
           <div style={S.inputWrap}>
-            <input type="number" min="0" max="100" value={socTo} onChange={(e) => setSocTo(Math.min(Number(e.target.value) || 0, 100))} style={S.input} />
+            <input aria-label="Hasta (objetivo)" type="number" min="0" max="100" value={socTo} onChange={(e) => setSocTo(Math.min(Number(e.target.value) || 0, 100))} style={S.input} />
             <span style={S.unit}>%</span>
           </div>
         </div>
         <div style={S.field}>
           <label style={S.label}>Tipo de cambio</label>
           <div style={S.inputWrap}>
-            <input type="number" step="0.1" value={tipoCambio} onChange={(e) => setTipoCambio(Number(e.target.value) || 1)} style={S.input} />
+            <input aria-label="Tipo de cambio" type="number" step="0.1" value={tipoCambio} onChange={(e) => setTipoCambio(Number(e.target.value) || 1)} style={S.input} />
             <span style={S.unit}>$/USD</span>
           </div>
         </div>
@@ -302,7 +303,7 @@ const S = {
     display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
     gap: 12, marginBottom: 8,
   },
-  label: { fontFamily: mono, fontSize: 10.5, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.04em' },
+  label: { fontFamily: mono, fontSize: 11.5, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.04em' },
   inputWrap: { position: 'relative' },
   input: {
     width: '100%', fontFamily: mono, fontSize: 14, padding: '10px 12px',
@@ -319,14 +320,14 @@ const S = {
     background: C.bg, border: `1px solid ${C.real}`, borderRadius: 6,
     padding: '16px 18px', marginBottom: 16,
   },
-  bestLabel: { fontFamily: mono, fontSize: 10.5, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 },
+  bestLabel: { fontFamily: mono, fontSize: 11.5, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 },
   bestValue: { fontSize: 16, fontWeight: 600, color: C.text, marginBottom: 6 },
   bestSub: { fontSize: 12.5, color: C.dim, fontWeight: 400, fontFamily: mono },
   bestCosto: { fontFamily: mono, fontSize: 24, fontWeight: 600, color: C.real },
   resultUsd: { fontSize: 13, color: C.dim, fontWeight: 400 },
   tableWrap: { overflowX: 'auto', marginBottom: 10 },
   table: { width: '100%', borderCollapse: 'collapse', minWidth: 520 },
-  th: { textAlign: 'left', fontFamily: mono, fontSize: 10, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.04em', padding: '8px 10px', borderBottom: `1px solid ${C.line}`, whiteSpace: 'nowrap' },
+  th: { textAlign: 'left', fontFamily: mono, fontSize: 11, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.04em', padding: '8px 10px', borderBottom: `1px solid ${C.line}`, whiteSpace: 'nowrap' },
   td: { padding: '9px 10px', fontSize: 12.5, borderBottom: `1px solid ${C.line}`, whiteSpace: 'nowrap' },
   tdMono: { fontFamily: mono },
   rowBest: { background: 'rgba(61,220,151,0.06)' },

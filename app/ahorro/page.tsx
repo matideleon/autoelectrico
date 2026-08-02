@@ -178,6 +178,8 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
       `}</style>
       <Nav />
 
+      <main id="contenido" className="page-main">
+
       {/* Header */}
       <header style={{
         textAlign: 'center',
@@ -187,7 +189,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
       }}>
         <div style={{
           fontSize: '12px',
-          color: '#666',
+          color: '#9AA1AC',
           textTransform: 'uppercase',
           letterSpacing: '1px',
           marginBottom: '20px'
@@ -235,7 +237,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
           }}>
             <h2 style={{
               fontSize: '12px',
-              color: '#666',
+              color: '#9AA1AC',
               textTransform: 'uppercase',
               letterSpacing: '1px',
               margin: '0 0 20px 0',
@@ -253,7 +255,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                 Kilómetros por mes
               </label>
               <div style={{ position: 'relative' }}>
-                <input
+                <input aria-label="Kilómetros por mes"
                   type="number"
                   value={kilometrosPorMes}
                   onChange={(e) => setKilometrosPorMes(Number(e.target.value))}
@@ -274,7 +276,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                   right: '12px',
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  color: '#666',
+                  color: '#9AA1AC',
                   fontSize: '14px'
                 }}>
                   km
@@ -292,7 +294,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
           }}>
             <h2 style={{
               fontSize: '12px',
-              color: '#666',
+              color: '#9AA1AC',
               textTransform: 'uppercase',
               letterSpacing: '1px',
               margin: '0 0 20px 0',
@@ -310,11 +312,11 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
               }}>
                 Precio de la nafta
               </label>
-              <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>
+              <div style={{ fontSize: '12px', color: '#9AA1AC', marginBottom: '8px' }}>
                 ANCAP · jul 2026
               </div>
               <div style={{ position: 'relative' }}>
-                <input
+                <input aria-label="Precio de la nafta"
                   type="number"
                   step="0.01"
                   value={precioNafta}
@@ -336,7 +338,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                   right: '12px',
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  color: '#666',
+                  color: '#9AA1AC',
                   fontSize: '14px'
                 }}>
                   $/L
@@ -354,7 +356,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                 Consumo
               </label>
               <div style={{ position: 'relative' }}>
-                <input
+                <input aria-label="Consumo"
                   type="number"
                   step="0.1"
                   value={consumoCombustion}
@@ -376,7 +378,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                   right: '12px',
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  color: '#666',
+                  color: '#9AA1AC',
                   fontSize: '14px'
                 }}>
                   km/L
@@ -393,11 +395,11 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
               }}>
                 Precio de compra
               </label>
-              <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>
+              <div style={{ fontSize: '12px', color: '#9AA1AC', marginBottom: '8px' }}>
                 Opcional. Sirve para comparar la patente de los dos autos.
               </div>
               <div style={{ position: 'relative' }}>
-                <input
+                <input aria-label="Precio de compra"
                   type="number"
                   value={precioCombustion === 0 ? '' : precioCombustion}
                   onChange={(e) => setPrecioCombustion(Number(e.target.value) || 0)}
@@ -419,7 +421,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                   right: '12px',
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  color: '#666',
+                  color: '#9AA1AC',
                   fontSize: '14px'
                 }}>
                   USD
@@ -437,7 +439,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
           }}>
             <h2 style={{
               fontSize: '12px',
-              color: '#666',
+              color: '#9AA1AC',
               textTransform: 'uppercase',
               letterSpacing: '1px',
               margin: '0 0 20px 0',
@@ -456,11 +458,11 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
               }}>
                 Elegí tu vehículo
               </label>
-              <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>
+              <div style={{ fontSize: '12px', color: '#9AA1AC', marginBottom: '8px' }}>
                 Autocompleta consumo y precio. Podés editarlos después.
               </div>
               <div className="ahorro-vehicle-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '8px' }}>
-                <select
+                <select aria-label="Marca del vehículo"
                   value={selectedBrand}
                   onChange={(e) => {
                     setSelectedBrand(e.target.value);
@@ -474,6 +476,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                   ))}
                 </select>
                 <select
+                  aria-label="Modelo del vehículo"
                   value={selectedSlug}
                   onChange={(e) => setSelectedSlug(e.target.value)}
                   disabled={!selectedBrand}
@@ -516,7 +519,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                     </div>
                   )}
                   {selectedModel.priceUsd == null && (
-                    <div style={{ color: '#8A9099', marginTop: 6 }}>
+                    <div style={{ color: '#9AA1AC', marginTop: 6 }}>
                       No tenemos precio verificado para este modelo todavía:
                       ingresalo vos abajo para calcular la amortización.
                     </div>
@@ -539,10 +542,10 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
               }}>
                 Tarifa de UTE
               </label>
-              <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>
+              <div style={{ fontSize: '12px', color: '#9AA1AC', marginBottom: '8px' }}>
                 Horario barato con IVA incluido
               </div>
-              <select
+              <select aria-label="Tarifa de UTE"
                 value={tarifaUte}
                 onChange={(e) => {
                   const selected = e.target.value as 'doble' | 'triple';
@@ -566,7 +569,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                 Precio del kWh resultante
               </label>
               <div style={{ position: 'relative' }}>
-                <input
+                <input aria-label="Precio del kWh resultante"
                   type="number"
                   step="0.01"
                   value={precioKwh.toFixed(3)}
@@ -578,7 +581,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                     border: '1px solid #2a2d33',
                     borderRadius: '4px',
                     padding: '12px 60px 12px 12px',
-                    color: '#888',
+                    color: '#9AA1AC',
                     fontSize: '16px',
                     fontFamily: 'IBM Plex Mono, monospace'
                   }}
@@ -588,7 +591,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                   right: '12px',
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  color: '#666',
+                  color: '#9AA1AC',
                   fontSize: '14px'
                 }}>
                   $/kWh
@@ -606,7 +609,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                 Consumo
               </label>
               <div style={{ position: 'relative' }}>
-                <input
+                <input aria-label="Consumo"
                   type="number"
                   step="0.1"
                   value={consumoElectrico}
@@ -628,7 +631,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                   right: '12px',
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  color: '#666',
+                  color: '#9AA1AC',
                   fontSize: '14px'
                 }}>
                   kWh/100km
@@ -646,7 +649,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                 Precio de compra
               </label>
               <div style={{ position: 'relative' }}>
-                <input
+                <input aria-label="Precio de compra"
                   type="number"
                   value={precioElectrico === 0 ? '' : precioElectrico}
                   onChange={(e) => setPrecioElectrico(Number(e.target.value) || 0)}
@@ -668,7 +671,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                   right: '12px',
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  color: '#666',
+                  color: '#9AA1AC',
                   fontSize: '14px'
                 }}>
                   USD
@@ -686,7 +689,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
           }}>
             <h2 style={{
               fontSize: '12px',
-              color: '#666',
+              color: '#9AA1AC',
               textTransform: 'uppercase',
               letterSpacing: '1px',
               margin: '0 0 20px 0',
@@ -704,7 +707,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                 Tipo de cambio
               </label>
               <div style={{ position: 'relative' }}>
-                <input
+                <input aria-label="Tipo de cambio"
                   type="number"
                   step="0.1"
                   value={tipoCambio}
@@ -726,7 +729,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                   right: '12px',
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  color: '#666',
+                  color: '#9AA1AC',
                   fontSize: '14px'
                 }}>
                   $/USD
@@ -748,7 +751,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
           }}>
             <div style={{
               fontSize: '12px',
-              color: '#666',
+              color: '#9AA1AC',
               textTransform: 'uppercase',
               letterSpacing: '1px',
               marginBottom: '16px',
@@ -772,14 +775,14 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                 </div>
                 <div style={{
                   fontSize: '12px',
-                  color: '#666',
+                  color: '#9AA1AC',
                   marginTop: '4px'
                 }}>
                   combustión
                 </div>
               </div>
               <div style={{
-                color: '#666',
+                color: '#9AA1AC',
                 fontSize: '16px'
               }}>
                 vs
@@ -795,7 +798,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                 </div>
                 <div style={{
                   fontSize: '12px',
-                  color: '#666',
+                  color: '#9AA1AC',
                   marginTop: '4px'
                 }}>
                   eléctrico
@@ -813,7 +816,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
           }}>
             <div style={{
               fontSize: '12px',
-              color: '#666',
+              color: '#9AA1AC',
               textTransform: 'uppercase',
               letterSpacing: '1px',
               marginBottom: '16px',
@@ -836,11 +839,11 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                   }}>
                     ${Math.round(patenteCombustion).toLocaleString()}
                   </div>
-                  <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                  <div style={{ fontSize: '12px', color: '#9AA1AC', marginTop: '4px' }}>
                     combustión · 5%
                   </div>
                 </div>
-                <div style={{ color: '#666', fontSize: '16px' }}>vs</div>
+                <div style={{ color: '#9AA1AC', fontSize: '16px' }}>vs</div>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{
                     fontSize: '24px',
@@ -850,7 +853,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
                   }}>
                     ${Math.round(patenteElectrico).toLocaleString()}
                   </div>
-                  <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                  <div style={{ fontSize: '12px', color: '#9AA1AC', marginTop: '4px' }}>
                     eléctrico · 3%
                   </div>
                 </div>
@@ -858,7 +861,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
             ) : (
               <div style={{
                 fontSize: '13px',
-                color: '#666',
+                color: '#9AA1AC',
                 textAlign: 'center',
                 lineHeight: '1.5'
               }}>
@@ -867,7 +870,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
             )}
             <div style={{
               fontSize: '12px',
-              color: '#666',
+              color: '#9AA1AC',
               lineHeight: '1.5',
               marginTop: '16px',
               paddingTop: '14px',
@@ -914,7 +917,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
               </div>
               <div style={{
                 fontSize: '14px',
-                color: '#666'
+                color: '#9AA1AC'
               }}>
                 ${Math.round(ahorroAnual).toLocaleString()} al año
               </div>
@@ -959,7 +962,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
           }}>
             <div style={{
               fontSize: '12px',
-              color: '#666',
+              color: '#9AA1AC',
               textTransform: 'uppercase',
               letterSpacing: '1px',
               marginBottom: '16px',
@@ -985,7 +988,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
               </div>
               <div style={{
                 fontSize: '14px',
-                color: '#666',
+                color: '#9AA1AC',
                 marginBottom: '16px'
               }}>
                 {amortizacionAnios != null
@@ -998,7 +1001,7 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
               </div>
               <div style={{
                 fontSize: '12px',
-                color: '#666',
+                color: '#9AA1AC',
                 lineHeight: '1.4'
               }}>
                 {precioCombustion > 0 && baseAmortizacionUYU > 0
@@ -1036,12 +1039,14 @@ Calculá el tuyo en autoelectrico.uy/ahorro`;
         </div>
       </div>
 
+      </main>
+
       {/* Footer */}
       <footer style={{
         borderTop: '1px solid #2a2d33',
         padding: '40px 20px',
         textAlign: 'center',
-        color: '#666',
+        color: '#9AA1AC',
         fontSize: '14px',
         lineHeight: '1.5'
       }}>

@@ -40,8 +40,8 @@ const C = {
   surface: '#1B1E23',
   line: '#2A2E35',
   text: '#E6E8EB',
-  dim: '#8A9099',
-  faint: '#565C66',
+  dim: '#9AA1AC',
+  faint: '#828993',
   real: '#3DDC97',
   lab: '#E8A33D',
 };
@@ -69,6 +69,7 @@ export default function PuertoArticle() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Nav />
+      <main id="contenido" className="page-main">
       <article style={S.root}>
         <div style={S.wrap}>
           <header style={S.header}>
@@ -212,6 +213,7 @@ export default function PuertoArticle() {
           </footer>
         </div>
       </article>
+      </main>
     </>
   );
 }
@@ -221,7 +223,7 @@ const S: Record<string, React.CSSProperties> = {
   wrap: { maxWidth: 720, margin: '0 auto' },
   header: { marginBottom: 32, paddingTop: 20 },
   eyebrow: { fontFamily: mono, fontSize: 11, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 14 },
-  eyebrowSmall: { fontFamily: mono, fontSize: 10, color: C.lab, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 10 },
+  eyebrowSmall: { fontFamily: mono, fontSize: 11, color: C.lab, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 10 },
   h1: { fontSize: 'clamp(26px, 5.5vw, 38px)', fontWeight: 600, letterSpacing: '-0.02em', lineHeight: 1.2, margin: '0 0 16px' },
   dek: { fontSize: 16, color: C.dim, lineHeight: 1.6, margin: '0 0 14px', maxWidth: '60ch' },
   meta: { fontFamily: mono, fontSize: 11, color: C.faint },

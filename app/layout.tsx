@@ -87,6 +87,50 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           @media (prefers-reduced-motion: reduce) {
             .lg, .lg-soft, .lg-bar { transition: none !important; }
           }
+
+          /* ===== Landmark principal =====
+             Todo el contenido de cada página vive dentro de un
+             <main class="page-main"> único. Además reserva espacio
+             abajo en móvil: el FAB del chat y el CTA flotante se
+             superponían a los últimos enlaces y tarjetas. */
+          .page-main { display: block; }
+
+          /* El FAB del chat es fixed: sin espacio extra al final del
+             documento tapa las últimas tarjetas y enlaces, y no hay
+             forma de scrollear para verlos. */
+          body { padding-bottom: 96px; }
+
+          @media (max-width: 768px) {
+            body { padding-bottom: 116px; }
+            /* Margen a la derecha en el último bloque para que el FAB
+               no se apoye encima del botón de WhatsApp. */
+            body > section[aria-label="Publicidad en autoelectrico.uy"] {
+              padding-bottom: 28px;
+            }
+          }
+
+          /* ===== Salto al contenido (teclado / lector de pantalla) ===== */
+          .skip-link {
+            position: absolute;
+            left: 12px;
+            top: -60px;
+            z-index: 200;
+            padding: 10px 16px;
+            border-radius: 10px;
+            background: #3DDC97;
+            color: #0E1013;
+            font: 600 13px/1 'IBM Plex Sans', -apple-system, sans-serif;
+            text-decoration: none;
+            transition: top .15s ease;
+          }
+          .skip-link:focus { top: 12px; }
+
+          /* ===== Foco visible y consistente ===== */
+          :focus-visible {
+            outline: 2px solid #3DDC97;
+            outline-offset: 2px;
+            border-radius: 4px;
+          }
         ` }} />
       </head>
       <body style={{ margin: 0, background: '#141619' }}>

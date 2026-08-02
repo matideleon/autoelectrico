@@ -37,8 +37,8 @@ const C = {
   surface: '#1B1E23',
   line: '#2A2E35',
   text: '#E6E8EB',
-  dim: '#8A9099',
-  faint: '#565C66',
+  dim: '#9AA1AC',
+  faint: '#828993',
   real: '#3DDC97',
   lab: '#E8A33D',
 };
@@ -66,6 +66,7 @@ export default function VoltajeArticle() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Nav />
+      <main id="contenido" className="page-main">
       <article style={S.root}>
         <div style={S.wrap}>
           <header style={S.header}>
@@ -226,6 +227,7 @@ export default function VoltajeArticle() {
           </footer>
         </div>
       </article>
+      </main>
     </>
   );
 }

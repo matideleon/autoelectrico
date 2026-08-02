@@ -20,7 +20,7 @@ const C = {
   surface: '#1B1E23',
   line: '#2A2E35',
   text: '#E6E8EB',
-  dim: '#8A9099',
+  dim: '#9AA1AC',
   real: '#3DDC97',
 };
 
@@ -114,7 +114,11 @@ export default function Nav() {
         }
       `}</style>
 
-      <nav className="lg-bar" style={S.nav}>
+      <a href="#contenido" className="skip-link">
+        Saltar al contenido
+      </a>
+
+      <nav className="lg-bar" style={S.nav} aria-label="Navegación principal">
         <a href="/" style={S.logoLink}>
           <img
             src="/logo-icon.png"

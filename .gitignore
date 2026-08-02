@@ -19,6 +19,8 @@ next-env.d.ts
 # os
 .DS_Store
 Thumbs.db
+# residuo de montajes FUSE al editar archivos abiertos
+.fuse_hidden*
 
 # test
 coverage/

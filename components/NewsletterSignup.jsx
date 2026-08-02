@@ -15,11 +15,11 @@ const C = {
   surface: '#1B1E23',
   line: '#2A2E35',
   text: '#E6E8EB',
-  dim: '#8A9099',
-  faint: '#565C66',
+  dim: '#9AA1AC',
+  faint: '#828993',
   real: '#3DDC97',
-  lab: '#B8734E',
-  gap: '#4A505A',
+  lab: '#C58259',
+  gap: '#838A94',
 };
 
 const mono = "'IBM Plex Mono', ui-monospace, Menlo, monospace";
@@ -104,6 +104,7 @@ export default function NewsletterSignup() {
             onChange={(e) => setEmail(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && submit()}
             placeholder="vos@ejemplo.com"
+            aria-label="Tu correo electrónico"
             className="nl-in"
             style={S.input}
             autoComplete="email"
@@ -114,6 +115,7 @@ export default function NewsletterSignup() {
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && submit()}
             placeholder="Tu nombre (opcional)"
+            aria-label="Tu nombre (opcional)"
             className="nl-in"
             style={S.input}
             autoComplete="name"
@@ -205,7 +207,7 @@ const S = {
   fieldset: { border: 0, padding: 0, margin: '0 0 18px' },
   legend: {
     fontFamily: mono,
-    fontSize: 10,
+    fontSize: 11,
     color: C.dim,
     textTransform: 'uppercase',
     letterSpacing: '0.08em',
@@ -247,7 +249,7 @@ const S = {
   },
   privacy: {
     fontFamily: mono,
-    fontSize: 10,
+    fontSize: 11,
     color: C.faint,
     textAlign: 'center',
     margin: '10px 0 0',

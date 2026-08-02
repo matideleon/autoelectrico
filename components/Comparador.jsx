@@ -29,11 +29,11 @@ const C = {
   surface: '#1B1E23',
   line: '#2A2E35',
   text: '#E6E8EB',
-  dim: '#8A9099',
-  faint: '#565C66',
+  dim: '#9AA1AC',
+  faint: '#828993',
   real: '#3DDC97',
   lab: '#E8A33D',
-  gap: '#4A505A',
+  gap: '#838A94',
 };
 
 const mono = "'IBM Plex Mono', ui-monospace, Menlo, monospace";
@@ -136,20 +136,25 @@ function SlotCombobox({ index, value, options, excludeSlugs, onChange, styles })
     setQuery('');
   };
 
+  const labelId = `slot-label-${index}`;
+
   return (
     <div style={styles.slotGroup} ref={boxRef}>
-      <label style={styles.slotLabel}>Auto {index + 1}</label>
+      <span id={labelId} style={styles.slotLabel}>Auto {index + 1}</span>
       <div style={styles.comboWrap}>
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
           style={styles.comboTrigger}
           className="combo-trigger"
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          aria-labelledby={labelId}
         >
           <span style={selected ? styles.comboValue : styles.comboPlaceholder}>
             {selected ? `${selected.brand} ${selected.model}${selected.variant ? ` ${selected.variant}` : ''}` : 'Buscar vehículo…'}
           </span>
-          <span style={styles.comboChevron}>{open ? '▲' : '▼'}</span>
+          <span style={styles.comboChevron} aria-hidden="true">{open ? '▲' : '▼'}</span>
         </button>
 
         {selected && !open && (
@@ -172,6 +177,7 @@ function SlotCombobox({ index, value, options, excludeSlugs, onChange, styles })
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Buscar para filtrar el listado"
+              aria-label={`Buscar el auto ${index + 1}`}
               style={styles.comboSearch}
             />
             <div style={styles.comboList}>
@@ -235,7 +241,8 @@ export default function Comparador({ models: dbModels }) {
   useEffect(() => {
     if (typeof window === 'undefined' || !MODELS_LIVE.length) return;
     const params = new URLSearchParams(window.location.search);
-    const ids = params.get('ids');
+    // ?ids=a,b (comparativa compartida) o ?a=slug (desde una ficha).
+    const ids = params.get('ids') ?? params.get('a');
     if (!ids) return;
     const slugs = ids.split(',').filter((s) => MODELS_LIVE.some((m) => m.slug === s));
     if (slugs.length) {
@@ -244,6 +251,34 @@ export default function Comparador({ models: dbModels }) {
       setSlots(next);
     }
   }, [MODELS_LIVE]);
+
+  /* Arranque rápido: los más baratos con precio verificado. El
+     comparador vacío obligaba a elegir dos modelos a ciegas antes
+     de ver un solo número — ahora se puede entrar mirando. */
+  const suggestions = useMemo(
+    () =>
+      MODELS_LIVE.filter((m) => m.price_usd != null)
+        .sort((a, b) => a.price_usd - b.price_usd)
+        .slice(0, 6),
+    [MODELS_LIVE]
+  );
+
+  const loadSuggestion = (slugsToLoad) => {
+    const next = ['', '', '', ''];
+    slugsToLoad.slice(0, MAX_MODELS).forEach((s, i) => { next[i] = s; });
+    setSlots(next);
+  };
+
+  const addModel = (slug) => {
+    setSlots((prev) => {
+      if (prev.includes(slug)) return prev;
+      const free = prev.indexOf('');
+      if (free === -1) return prev;
+      const next = [...prev];
+      next[free] = slug;
+      return next;
+    });
+  };
 
   const setSlot = (index, slug) => {
     setSlots((prev) => {
@@ -290,11 +325,6 @@ export default function Comparador({ models: dbModels }) {
             midió. El precio aparece solo cuando está verificado con fuente.
           </p>
 
-          <div style={styles.badges}>
-            <span style={styles.badge}>Hasta {MAX_MODELS} modelos</span>
-            <span style={styles.badge}>Datos citados con fuente</span>
-            <span style={styles.badge}>Compartí tu comparativa</span>
-          </div>
         </header>
 
         <div style={styles.slotsGrid}>
@@ -312,7 +342,13 @@ export default function Comparador({ models: dbModels }) {
         </div>
 
         <div style={styles.countRow}>
-          <span style={styles.countText}>{picked.length} de {MAX_MODELS} seleccionados</span>
+          <span style={styles.countText} role="status" aria-live="polite">
+            {picked.length === 0
+              ? `Elegí 2 modelos para empezar`
+              : picked.length === 1
+              ? 'Agregá uno más para ver la comparación'
+              : `Comparando ${picked.length} de ${MAX_MODELS}`}
+          </span>
           <div style={styles.countActions}>
             {picked.length > 0 && (
               <button onClick={share} style={styles.actionLink} className="action-link">
@@ -340,7 +376,7 @@ export default function Comparador({ models: dbModels }) {
                   </th>
                   {list.map((m) => (
                     <th key={m.slug} style={{ ...styles.th, width: `${70 / list.length}%` }} scope="col">
-                      <CarSilhouette body={m.body} heroImage={m.hero_image} size={isMobile ? 48 : 64} color="#565C66" />
+                      <CarSilhouette body={m.body} heroImage={m.hero_image} size={isMobile ? 48 : 64} color="#828993" />
                       <div style={styles.thBrand}>{m.brand}</div>
                       <div style={styles.thModel}>{m.model}</div>
                     </th>
@@ -373,10 +409,52 @@ export default function Comparador({ models: dbModels }) {
           </div>
         )}
 
-        {list.length === 0 && (
+        {list.length === 0 && suggestions.length >= 2 && (
+          <div style={styles.empty}>
+            <p style={styles.emptyTitle}>Empezá por acá</p>
+            <p style={styles.emptyText}>
+              Cargá una comparativa de un toque, o buscá los tuyos en los
+              selectores de arriba.
+            </p>
+
+            <button
+              type="button"
+              className="quick-start"
+              style={styles.quickStart}
+              onClick={() => loadSuggestion(suggestions.slice(0, 3).map((m) => m.slug))}
+            >
+              Los 3 más accesibles con precio verificado →
+            </button>
+
+            <div style={styles.chips}>
+              {suggestions.map((m) => (
+                <button
+                  key={m.slug}
+                  type="button"
+                  className="chip"
+                  style={styles.chip}
+                  onClick={() => addModel(m.slug)}
+                >
+                  <span style={styles.chipPlus} aria-hidden="true">+</span>
+                  {m.brand} {m.model}
+                  <em style={styles.chipPrice}>USD {fmt(m.price_usd)}</em>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {list.length === 0 && suggestions.length < 2 && (
           <div style={styles.empty}>
             <p style={styles.emptyText}>Buscá y agregá hasta {MAX_MODELS} modelos para comparar.</p>
           </div>
+        )}
+
+        {list.length === 1 && (
+          <p style={styles.singleHint}>
+            Con un solo modelo no hay contra qué comparar: ya ves su ficha en la
+            tabla, sumá otro y aparecen los ganadores de cada fila.
+          </p>
         )}
 
         <div style={styles.bottomVizGrid}>
@@ -407,7 +485,7 @@ const baseStyles = {
   lede: { fontSize: 14, color: C.dim, lineHeight: 1.6, margin: '0 0 18px', maxWidth: '58ch' },
   badges: { display: 'flex', gap: 8, flexWrap: 'wrap' },
   badge: {
-    fontFamily: mono, fontSize: 10.5, color: C.dim, background: C.surface,
+    fontFamily: mono, fontSize: 11.5, color: C.dim, background: C.surface,
     border: `1px solid ${C.line}`, borderRadius: 20, padding: '6px 13px',
     letterSpacing: '0.02em',
   },
@@ -415,7 +493,7 @@ const baseStyles = {
     display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginBottom: 16,
   },
   slotGroup: { display: 'flex', flexDirection: 'column', gap: 6, position: 'relative' },
-  slotLabel: { fontFamily: mono, fontSize: 10.5, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.06em' },
+  slotLabel: { fontFamily: mono, fontSize: 11.5, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.06em' },
   comboWrap: { position: 'relative' },
   comboTrigger: {
     width: '100%', fontFamily: sans, fontSize: 13.5, padding: '11px 34px 11px 13px',
@@ -425,7 +503,7 @@ const baseStyles = {
   },
   comboValue: { color: C.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   comboPlaceholder: { color: C.faint, fontFamily: mono, fontSize: 12.5 },
-  comboChevron: { color: C.faint, fontSize: 9, flexShrink: 0 },
+  comboChevron: { color: C.faint, fontSize: 11, flexShrink: 0 },
   comboClear: {
     position: 'absolute', right: 30, top: '50%', transform: 'translateY(-50%)',
     background: 'transparent', border: 'none', color: C.faint, fontSize: 16,
@@ -456,8 +534,31 @@ const baseStyles = {
     border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline',
     textUnderlineOffset: 3,
   },
-  empty: { background: C.surface, border: `1px solid ${C.line}`, borderRadius: 4, padding: '40px 20px', textAlign: 'center', marginBottom: 26 },
-  emptyText: { color: C.dim, fontSize: 14, margin: 0 },
+  empty: { background: C.surface, border: `1px solid ${C.line}`, borderRadius: 4, padding: '32px 20px', textAlign: 'center', marginBottom: 26 },
+  emptyTitle: { fontSize: 17, fontWeight: 600, color: C.text, margin: '0 0 6px' },
+  emptyText: { color: C.dim, fontSize: 14, margin: '0 0 18px', lineHeight: 1.55 },
+  quickStart: {
+    minHeight: 46, padding: '12px 20px', marginBottom: 20,
+    fontFamily: mono, fontSize: 12.5, letterSpacing: '0.02em',
+    background: C.real, color: C.bg, border: `1px solid ${C.real}`,
+    borderRadius: 5, cursor: 'pointer', fontWeight: 500,
+    transition: 'background 140ms ease',
+  },
+  chips: { display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' },
+  chip: {
+    display: 'inline-flex', alignItems: 'center', gap: 7, minHeight: 40,
+    padding: '9px 14px', fontFamily: mono, fontSize: 12, color: C.text,
+    background: C.bg, border: `1px solid ${C.line}`, borderRadius: 20,
+    cursor: 'pointer', transition: 'border-color 140ms ease, color 140ms ease',
+  },
+  chipPlus: { color: C.real, fontSize: 14, lineHeight: 1 },
+  chipPrice: { color: C.dim, fontStyle: 'normal', fontSize: 11.5 },
+  singleHint: {
+    fontFamily: sans, fontSize: 13.5, color: C.dim, lineHeight: 1.6,
+    margin: '0 0 20px', padding: '12px 14px',
+    background: C.surface, border: `1px solid ${C.line}`,
+    borderLeft: `2px solid ${C.lab}`, borderRadius: 4,
+  },
   scroll: { overflowX: 'auto', marginBottom: 20 },
   table: { width: '100%', borderCollapse: 'collapse', minWidth: 520 },
   caption: { position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' },
@@ -473,9 +574,9 @@ const baseStyles = {
   missing: { fontFamily: mono, fontSize: 12, color: C.gap, fontStyle: 'italic' },
   mark: { color: C.real, fontSize: 8, marginLeft: 7, verticalAlign: 'middle' },
   incomp: { color: C.faint, fontSize: 14, marginLeft: 7, cursor: 'help' },
-  tagLab: { display: 'block', fontSize: 9, color: C.lab, marginTop: 3, letterSpacing: '0.04em', textTransform: 'none' },
-  tagReal: { display: 'block', fontSize: 9, color: C.real, marginTop: 3, letterSpacing: '0.04em', textTransform: 'none' },
-  tagQuoted: { display: 'block', fontSize: 9, color: C.dim, marginTop: 3, letterSpacing: '0.02em', fontFamily: mono, whiteSpace: 'normal' },
+  tagLab: { display: 'block', fontSize: 11, color: C.lab, marginTop: 3, letterSpacing: '0.04em', textTransform: 'none' },
+  tagReal: { display: 'block', fontSize: 11, color: C.real, marginTop: 3, letterSpacing: '0.04em', textTransform: 'none' },
+  tagQuoted: { display: 'block', fontSize: 11, color: C.dim, marginTop: 3, letterSpacing: '0.02em', fontFamily: mono, whiteSpace: 'normal' },
   bottomVizGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, alignItems: 'stretch', marginTop: 20 },
   legend: { display: 'flex', gap: 20, flexWrap: 'wrap', fontFamily: mono, fontSize: 11, color: C.faint, paddingTop: 16, borderTop: `1px solid ${C.line}` },
 };
@@ -484,19 +585,19 @@ const mobileStyles = {
   root: { background: C.bg, minHeight: '100vh', padding: '16px 10px 40px', fontFamily: sans, color: C.text },
   wrap: { maxWidth: '100%', margin: '0 auto' },
   head: { marginBottom: 18 },
-  eyebrow: { fontFamily: mono, fontSize: 10, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 },
+  eyebrow: { fontFamily: mono, fontSize: 11, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 },
   h1: { fontSize: 'clamp(22px, 6vw, 30px)', fontWeight: 600, letterSpacing: '-0.02em', margin: '0 0 10px', lineHeight: 1.1 },
   lede: { fontSize: 13, color: C.dim, lineHeight: 1.6, margin: '0 0 14px', maxWidth: '48ch' },
   badges: { display: 'flex', gap: 6, flexWrap: 'wrap' },
   badge: {
-    fontFamily: mono, fontSize: 9.5, color: C.dim, background: C.surface,
+    fontFamily: mono, fontSize: 11, color: C.dim, background: C.surface,
     border: `1px solid ${C.line}`, borderRadius: 20, padding: '5px 11px',
   },
   slotsGrid: {
     display: 'grid', gridTemplateColumns: '1fr', gap: 10, marginBottom: 12,
   },
   slotGroup: { display: 'flex', flexDirection: 'column', gap: 4, position: 'relative' },
-  slotLabel: { fontFamily: mono, fontSize: 9.5, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.06em' },
+  slotLabel: { fontFamily: mono, fontSize: 11, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.06em' },
   comboWrap: { position: 'relative' },
   comboTrigger: {
     width: '100%', fontFamily: sans, fontSize: 12.5, padding: '10px 30px 10px 11px',
@@ -530,35 +631,57 @@ const mobileStyles = {
   },
   comboNoResults: { fontFamily: mono, fontSize: 11, color: C.faint, padding: '12px 11px' },
   countRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 6 },
-  countText: { fontFamily: mono, fontSize: 10.5, color: C.dim },
+  countText: { fontFamily: mono, fontSize: 11.5, color: C.dim },
   countActions: { display: 'flex', gap: 12 },
   actionLink: {
-    fontFamily: mono, fontSize: 10.5, color: C.real, background: 'transparent',
+    fontFamily: mono, fontSize: 11.5, color: C.real, background: 'transparent',
     border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline',
     textUnderlineOffset: 3,
   },
-  empty: { background: C.surface, border: `1px solid ${C.line}`, borderRadius: 4, padding: '20px 10px', textAlign: 'center', marginBottom: 20 },
-  emptyText: { color: C.dim, fontSize: 13, margin: 0 },
+  empty: { background: C.surface, border: `1px solid ${C.line}`, borderRadius: 4, padding: '22px 14px', textAlign: 'center', marginBottom: 20 },
+  emptyTitle: { fontSize: 16, fontWeight: 600, color: C.text, margin: '0 0 6px' },
+  emptyText: { color: C.dim, fontSize: 13, margin: '0 0 16px', lineHeight: 1.55 },
+  quickStart: {
+    width: '100%', minHeight: 46, padding: '12px 16px', marginBottom: 16,
+    fontFamily: mono, fontSize: 12, letterSpacing: '0.02em',
+    background: C.real, color: C.bg, border: `1px solid ${C.real}`,
+    borderRadius: 5, cursor: 'pointer', fontWeight: 500,
+  },
+  chips: { display: 'flex', gap: 7, flexWrap: 'wrap', justifyContent: 'center' },
+  chip: {
+    display: 'inline-flex', alignItems: 'center', gap: 6, minHeight: 40,
+    padding: '9px 12px', fontFamily: mono, fontSize: 11.5, color: C.text,
+    background: C.bg, border: `1px solid ${C.line}`, borderRadius: 20,
+    cursor: 'pointer',
+  },
+  chipPlus: { color: C.real, fontSize: 14, lineHeight: 1 },
+  chipPrice: { color: C.dim, fontStyle: 'normal', fontSize: 11 },
+  singleHint: {
+    fontFamily: sans, fontSize: 13, color: C.dim, lineHeight: 1.55,
+    margin: '0 0 16px', padding: '11px 12px',
+    background: C.surface, border: `1px solid ${C.line}`,
+    borderLeft: `2px solid ${C.lab}`, borderRadius: 4,
+  },
   scroll: { overflowX: 'auto', marginBottom: 16 },
   table: { width: '100%', borderCollapse: 'collapse', minWidth: 300 },
   caption: { position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' },
   srOnly: { position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' },
   th: { textAlign: 'left', padding: '0 8px 8px', borderBottom: `1px solid ${C.line}`, verticalAlign: 'bottom' },
   thFirst: { width: '30%', minWidth: 100 },
-  thBrand: { fontFamily: mono, fontSize: 10, color: C.faint, letterSpacing: '0.06em' },
+  thBrand: { fontFamily: mono, fontSize: 11, color: C.faint, letterSpacing: '0.06em' },
   thModel: { fontSize: 14, fontWeight: 600, letterSpacing: '-0.01em', marginTop: 1 },
-  rowLabel: { fontFamily: mono, fontSize: 10, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'left', fontWeight: 400, padding: '8px 8px', borderBottom: `1px solid ${C.line}`, verticalAlign: 'middle' },
+  rowLabel: { fontFamily: mono, fontSize: 11, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'left', fontWeight: 400, padding: '8px 8px', borderBottom: `1px solid ${C.line}`, verticalAlign: 'middle' },
   td: { padding: '8px 8px', borderBottom: `1px solid ${C.line}`, verticalAlign: 'middle' },
   value: { fontFamily: mono, fontWeight: 500, letterSpacing: '-0.01em' },
-  unit: { fontSize: 10, color: C.dim, fontStyle: 'normal' },
+  unit: { fontSize: 11, color: C.dim, fontStyle: 'normal' },
   missing: { fontFamily: mono, fontSize: 11, color: C.gap, fontStyle: 'italic' },
   mark: { color: C.real, fontSize: 7, marginLeft: 5, verticalAlign: 'middle' },
   incomp: { color: C.faint, fontSize: 12, marginLeft: 5, cursor: 'help' },
   tagLab: { display: 'block', fontSize: 8, color: C.lab, marginTop: 2, letterSpacing: '0.04em', textTransform: 'none' },
-  tagReal: { display: 'block', fontSize: 9, color: C.real, marginTop: 2, letterSpacing: '0.04em', textTransform: 'none' },
+  tagReal: { display: 'block', fontSize: 11, color: C.real, marginTop: 2, letterSpacing: '0.04em', textTransform: 'none' },
   tagQuoted: { display: 'block', fontSize: 8, color: C.dim, marginTop: 2, letterSpacing: '0.02em', fontFamily: mono, whiteSpace: 'normal' },
   bottomVizGrid: { display: 'flex', flexDirection: 'column', gap: 16, marginTop: 16 },
-  legend: { display: 'flex', gap: 16, flexWrap: 'wrap', fontFamily: mono, fontSize: 10, color: C.faint, paddingTop: 12, borderTop: `1px solid ${C.line}` },
+  legend: { display: 'flex', gap: 16, flexWrap: 'wrap', fontFamily: mono, fontSize: 11, color: C.faint, paddingTop: 12, borderTop: `1px solid ${C.line}` },
 };
 
 const CSS = `
@@ -567,6 +690,8 @@ const CSS = `
   .combo-option:hover { background: ${C.line}; }
   .combo-option:last-child { border-bottom: none; }
   .action-link:hover { opacity: 0.75; }
+  .quick-start:hover { background: #35c586 !important; }
+  .chip:hover { border-color: ${C.real} !important; color: ${C.real} !important; }
   .row:hover th, .row:hover td { background: ${C.surface}; }
   button:focus-visible, input:focus-visible { outline: 2px solid ${C.real}; outline-offset: 2px; }
   em { font-style: normal; }

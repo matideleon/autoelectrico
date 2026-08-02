@@ -21,8 +21,8 @@ const C = {
   surface: '#1B1E23',
   line: '#2a2d33',
   text: '#E6E8EB',
-  dim: '#8A9099',
-  faint: '#565C66',
+  dim: '#9AA1AC',
+  faint: '#828993',
   real: '#00d084',
   lab: '#E8A33D',
 };
@@ -219,7 +219,7 @@ const S = {
   },
   title: {
     fontSize: '12px',
-    color: '#666',
+    color: '#9AA1AC',
     textTransform: 'uppercase',
     letterSpacing: '1px',
     marginBottom: '14px',

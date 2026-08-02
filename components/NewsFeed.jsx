@@ -16,10 +16,10 @@ const C = {
   surface: '#1B1E23',
   line: '#2A2E35',
   text: '#E6E8EB',
-  dim: '#8A9099',
-  faint: '#565C66',
+  dim: '#9AA1AC',
+  faint: '#828993',
   real: '#3DDC97',
-  lab: '#B8734E',
+  lab: '#C58259',
 };
 
 const mono = "'IBM Plex Mono', ui-monospace, Menlo, monospace";
@@ -41,7 +41,7 @@ function ArticleCard({ article, featured }) {
       <p style={S.cardDek}>{article.dek}</p>
       <div style={S.cardFoot}>
         <span style={S.cardDate}>{formatDate(article.date)}</span>
-        <span style={S.cardRead}>Leer →</span>
+        <span style={S.cardRead} data-read>Leer →</span>
       </div>
     </a>
   );
@@ -72,7 +72,9 @@ export default function NewsFeed() {
           )}
         </div>
 
-        <a href="/noticias" style={S.viewAllLink}>Ver todas las noticias →</a>
+        <a href="/noticias" className="news-view-all" style={S.viewAllLink}>
+          Ver todas las noticias →
+        </a>
       </div>
     </section>
   );
@@ -124,7 +126,7 @@ const S = {
   },
   cardCategory: {
     fontFamily: mono,
-    fontSize: 10,
+    fontSize: 11,
     color: C.lab,
     textTransform: 'uppercase',
     letterSpacing: '0.08em',
@@ -146,22 +148,43 @@ const S = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 12,
+    minHeight: 32,
     fontFamily: mono,
-    fontSize: 11,
+    fontSize: 12,
   },
   cardDate: { color: C.faint },
-  cardRead: { color: C.real },
+  /* El target real es la tarjeta entera, pero el "Leer" tiene que
+     leerse como acción: caja propia, no texto suelto de 10 px. */
+  cardRead: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    minHeight: 30,
+    padding: '6px 12px',
+    color: C.real,
+    border: `1px solid rgba(61,220,151,0.35)`,
+    borderRadius: 4,
+    whiteSpace: 'nowrap',
+  },
   viewAllLink: {
-    display: 'inline-block',
+    display: 'inline-flex',
+    alignItems: 'center',
+    minHeight: 44,
+    padding: '12px 18px',
     marginTop: 20,
     fontFamily: mono,
-    fontSize: 12.5,
+    fontSize: 13,
     color: C.real,
+    border: `1px solid ${C.line}`,
+    borderRadius: 5,
     textDecoration: 'none',
+    transition: 'border-color 140ms ease',
   },
 };
 
 const CSS = `
 .news-card:hover { border-color: ${C.real} !important; transform: translateY(-2px); }
+.news-card:hover [data-read] { background: rgba(61,220,151,0.10); }
+.news-view-all:hover { border-color: ${C.real} !important; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 `;

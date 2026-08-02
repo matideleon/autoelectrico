@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import CarSilhouette from './CarSilhouette';
 import {
   patenteAnualUyu,
   patenteAnualUsd,
@@ -27,12 +28,17 @@ const C = {
   surface: '#1B1E23',
   line: '#2A2E35',
   text: '#E6E8EB',
-  dim: '#8A9099',
-  faint: '#565C66',
+  dim: '#9AA1AC',
+  faint: '#828993',
   real: '#3DDC97',   // medido
   lab: '#E8A33D',    // laboratorio
-  gap: '#4A505A',    // sin dato
+  gap: '#838A94',    // sin dato
 };
+
+/* Mismo número que el AdCTA global: una sola vía de contacto. */
+const WHATSAPP_NUMBER = '59895904714';
+const waHref = (msg) =>
+  `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
 
 /* --- Datos de ejemplo: el EX5 tal como está hoy en la DB.
    Los null son reales, no placeholders. --- */
@@ -221,7 +227,12 @@ function Spec({ label, value, unit, tone = 'real', note }) {
       <div style={S.specLabel}>{label}</div>
       <div style={{ ...S.specValue, color }}>
         {missing ? (
-          <span style={S.missing}>sin dato</span>
+          /* El hueco es información, pero tiene que leerse como una
+             decisión editorial y no como una ficha rota. */
+          <span style={S.missing} title="Todavía no lo pudimos verificar">
+            <span style={S.missingMark} aria-hidden="true" />
+            sin verificar
+          </span>
         ) : (
           <>
             {typeof value === 'number' ? fmt(value) : value}
@@ -365,6 +376,13 @@ export default function ModelSheet({ model }) {
       </div>}
 
       <article style={S.sheet}>
+        {/* Retrato del modelo: foto del fabricante si la tenemos,
+            silueta por carrocería si no. Una ficha de auto sin
+            imagen se lee como una planilla. */}
+        <div style={S.hero} aria-hidden="true">
+          <CarSilhouette body={m.body} heroImage={m.hero_image} size={150} color={C.gap} />
+        </div>
+
         {/* Encabezado */}
         <header style={S.head}>
           <div style={S.eyebrow}>
@@ -446,6 +464,30 @@ export default function ModelSheet({ model }) {
 
         <Completeness m={m} />
 
+        {/* Acciones: la ficha no tenía ninguna salida. Quien llega
+            acá decidido a comprar se quedaba sin próximo paso. */}
+        <section style={S.actions} aria-label="Qué hacer con este modelo">
+          <a
+            href={waHref(`Hola, quiero consultar por el ${m.brand} ${m.model}${m.variant ? ` ${m.variant}` : ''}`)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="sheet-btn sheet-btn-primary"
+            style={{ ...S.btn, ...S.btnPrimary }}
+          >
+            Consultar por este modelo
+          </a>
+          <a
+            href={`/comparar?a=${encodeURIComponent(m.slug ?? '')}`}
+            className="sheet-btn"
+            style={S.btn}
+          >
+            Comparar con otro
+          </a>
+          <a href="/ahorro" className="sheet-btn" style={S.btn}>
+            Calcular el ahorro
+          </a>
+        </section>
+
         {/* CTA */}
         <footer style={S.cta}>
           <div>
@@ -455,9 +497,15 @@ export default function ModelSheet({ model }) {
               como fuente.
             </div>
           </div>
-          <button className="cta-btn" style={S.ctaBtn}>
+          <a
+            href={waHref(`Hola, tengo un ${m.brand} ${m.model} y quiero aportar mi autonomía real`)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="cta-btn"
+            style={S.ctaBtn}
+          >
             Aportar un dato
-          </button>
+          </a>
         </footer>
       </article>
     </div>
@@ -542,7 +590,7 @@ const S = {
   },
   priceLabel: {
     fontFamily: mono,
-    fontSize: 10,
+    fontSize: 11,
     color: C.dim,
     textTransform: 'uppercase',
     letterSpacing: '0.1em',
@@ -578,7 +626,7 @@ const S = {
   },
   patenteLabel: {
     fontFamily: mono,
-    fontSize: 10,
+    fontSize: 11,
     color: C.dim,
     textTransform: 'uppercase',
     letterSpacing: '0.1em',
@@ -660,7 +708,7 @@ const S = {
   },
   emptyText: {
     fontFamily: mono,
-    fontSize: 9,
+    fontSize: 11,
     color: C.faint,
     letterSpacing: '0.05em',
     background: C.bg,
@@ -688,7 +736,7 @@ const S = {
   spec: { background: C.bg, padding: '14px 16px' },
   specLabel: {
     fontFamily: mono,
-    fontSize: 10,
+    fontSize: 11,
     color: C.dim,
     textTransform: 'uppercase',
     letterSpacing: '0.08em',
@@ -702,14 +750,24 @@ const S = {
     lineHeight: 1.2,
   },
   missing: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 7,
     fontSize: 13,
     fontStyle: 'italic',
     fontWeight: 400,
     letterSpacing: 0,
   },
+  missingMark: {
+    display: 'inline-block',
+    width: 18,
+    height: 0,
+    borderTop: `2px dotted ${C.gap}`,
+    opacity: 0.9,
+  },
   specNote: {
     fontFamily: mono,
-    fontSize: 10,
+    fontSize: 11,
     color: C.faint,
     marginTop: 5,
   },
@@ -728,7 +786,7 @@ const S = {
   },
   complLabel: {
     fontFamily: mono,
-    fontSize: 10,
+    fontSize: 11,
     color: C.dim,
     textTransform: 'uppercase',
     letterSpacing: '0.1em',
@@ -740,6 +798,45 @@ const S = {
     color: C.faint,
     marginTop: 10,
     lineHeight: 1.5,
+  },
+  hero: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 140,
+    marginBottom: 8,
+    padding: '18px 0',
+    borderBottom: `1px solid ${C.line}`,
+  },
+  actions: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: 10,
+    margin: '28px 0 24px',
+  },
+  btn: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 46,
+    padding: '12px 20px',
+    flex: '1 1 190px',
+    fontFamily: mono,
+    fontSize: 12.5,
+    letterSpacing: '0.03em',
+    textDecoration: 'none',
+    background: 'transparent',
+    color: C.text,
+    border: `1px solid ${C.line}`,
+    borderRadius: 4,
+    cursor: 'pointer',
+    transition: 'border-color 140ms ease, background 140ms ease, color 140ms ease',
+  },
+  btnPrimary: {
+    background: C.real,
+    color: C.bg,
+    borderColor: C.real,
+    fontWeight: 500,
   },
   cta: {
     display: 'flex',
@@ -759,6 +856,11 @@ const S = {
     maxWidth: '40ch',
   },
   ctaBtn: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 44,
+    textDecoration: 'none',
     fontFamily: mono,
     fontSize: 12,
     padding: '11px 20px',
@@ -779,6 +881,8 @@ const CSS = `
 
 .cta-btn:hover { background: ${C.real} !important; color: ${C.bg} !important; }
 .demo-btn:hover { border-color: ${C.dim} !important; }
+.sheet-btn:hover { border-color: ${C.real} !important; color: ${C.real} !important; }
+.sheet-btn-primary:hover { background: #35c586 !important; color: ${C.bg} !important; border-color: #35c586 !important; }
 
 button:focus-visible {
   outline: 2px solid ${C.real};

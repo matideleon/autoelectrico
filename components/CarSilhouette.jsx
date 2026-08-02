@@ -46,7 +46,7 @@ function Silhouette({ body, size, color }) {
   );
 }
 
-export default function CarSilhouette({ body, heroImage, size = 64, color = '#565C66' }) {
+export default function CarSilhouette({ body, heroImage, size = 64, color = '#828993' }) {
   const [imgError, setImgError] = useState(false);
 
   if (heroImage && !imgError) {

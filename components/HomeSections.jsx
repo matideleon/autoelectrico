@@ -18,11 +18,11 @@ const C = {
   surface: '#1B1E23',
   line: '#2A2E35',
   text: '#E6E8EB',
-  dim: '#8A9099',
-  faint: '#565C66',
+  dim: '#9AA1AC',
+  faint: '#828993',
   real: '#3DDC97',
   lab: '#E8A33D',
-  copper: '#B8734E',
+  copper: '#C58259',
 };
 const mono = "'IBM Plex Mono', ui-monospace, Menlo, monospace";
 const sans = "'IBM Plex Sans', -apple-system, sans-serif";
@@ -149,13 +149,13 @@ const S = {
     color: C.text, transition: 'border-color 150ms ease, transform 150ms ease',
     height: '100%', boxSizing: 'border-box',
   },
-  modelBrand: { fontFamily: mono, fontSize: 10, color: C.faint, letterSpacing: '0.06em' },
+  modelBrand: { fontFamily: mono, fontSize: 11, color: C.faint, letterSpacing: '0.06em' },
   modelName: { fontSize: 15, fontWeight: 600, marginTop: 2, marginBottom: 10, lineHeight: 1.3 },
   modelPrice: { fontFamily: mono, fontSize: 18, fontWeight: 500, marginBottom: 8, marginTop: 'auto' },
   currency: { fontSize: 11, color: C.dim, fontStyle: 'normal' },
   modelSpecs: {
     display: 'flex', gap: 10, flexWrap: 'wrap',
-    fontFamily: mono, fontSize: 10.5, color: C.dim,
+    fontFamily: mono, fontSize: 11.5, color: C.dim,
     paddingTop: 8, borderTop: `1px solid ${C.line}`,
   },
 

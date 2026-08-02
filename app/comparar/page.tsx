@@ -39,7 +39,9 @@ export default async function CompararPage() {
   return (
     <>
       <Nav />
-      <Comparador models={serialized} />
+      <main id="contenido" className="page-main">
+        <Comparador models={serialized} />
+      </main>
     </>
   );
 }

@@ -131,7 +131,7 @@ const S = {
     flexWrap: 'wrap', gap: 8, marginBottom: 18,
   },
   title: { fontSize: 16, fontWeight: 600, color: '#E6E8EB' },
-  note: { fontSize: 11.5, color: '#8A9099', fontFamily: "'IBM Plex Mono', monospace" },
+  note: { fontSize: 11.5, color: '#9AA1AC', fontFamily: "'IBM Plex Mono', monospace" },
   metricsWrap: { display: 'flex', flexDirection: 'column', gap: 22 },
   metricCard: {
     background: '#141619', border: '1px solid #2A2E35', borderRadius: 6, padding: '16px 18px',
@@ -140,20 +140,20 @@ const S = {
     display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 14,
   },
   metricLabel: { fontSize: 15, fontWeight: 600, color: '#E6E8EB' },
-  metricUnit: { fontSize: 11, color: '#8A9099', fontFamily: "'IBM Plex Mono', monospace" },
+  metricUnit: { fontSize: 11, color: '#9AA1AC', fontFamily: "'IBM Plex Mono', monospace" },
   row: { marginBottom: 14 },
   rowHead: {
     display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
     marginBottom: 6, gap: 8, flexWrap: 'wrap',
   },
-  rowLabel: { fontSize: 13, color: '#8A9099' },
+  rowLabel: { fontSize: 13, color: '#9AA1AC' },
   rowValue: { fontSize: 14, fontWeight: 600, color: '#E6E8EB', fontFamily: "'IBM Plex Mono', monospace", whiteSpace: 'nowrap' },
   star: { color: '#3DDC97' },
-  noData: { fontSize: 11.5, color: '#565C66', fontStyle: 'italic', fontWeight: 400, fontFamily: "'IBM Plex Sans', sans-serif" },
+  noData: { fontSize: 11.5, color: '#828993', fontStyle: 'italic', fontWeight: 400, fontFamily: "'IBM Plex Sans', sans-serif" },
   track: { height: 7, background: '#2A2E35', borderRadius: 4, overflow: 'hidden' },
   fill: { height: '100%', borderRadius: 4, transition: 'width 300ms ease' },
   trackEmpty: {
     height: '100%', width: '6%', borderRadius: 4,
-    border: '1px dashed #4A505A', boxSizing: 'border-box',
+    border: '1px dashed #838A94', boxSizing: 'border-box',
   },
 };

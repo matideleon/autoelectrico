@@ -19,10 +19,10 @@ import React, { useEffect, useState, useRef } from 'react';
 const C = {
   track: '#1F232A',
   real: '#3DDC97',
-  lab: '#B8734E',   // cobre: acento de marca, nunca de dato funcional
+  lab: '#C58259',   // cobre: acento de marca, nunca de dato funcional
   text: '#E6E8EB',
-  dim: '#8A9099',
-  faint: '#565C66',
+  dim: '#9AA1AC',
+  faint: '#828993',
 };
 
 // Ejemplo real, no inventado: BYD Dolphin, verificado en la base.
@@ -171,26 +171,26 @@ const S = {
   bigUnit: {
     fontFamily: "'IBM Plex Mono', monospace",
     fontSize: 13,
-    fill: '#8A9099',
+    fill: '#9AA1AC',
     letterSpacing: '0.04em',
   },
   wltpLabel: {
     fontFamily: "'IBM Plex Mono', monospace",
     fontSize: 11,
-    fill: '#B8734E',
+    fill: '#C58259',
     letterSpacing: '0.02em',
   },
   caption: {
     fontFamily: "'IBM Plex Mono', monospace",
     fontSize: 11,
-    color: '#8A9099',
+    color: '#9AA1AC',
     marginTop: 4,
     textAlign: 'center',
     lineHeight: 1.7,
   },
   captionSep: {
     margin: '0 8px',
-    color: '#565C66',
+    color: '#828993',
   },
 };
 

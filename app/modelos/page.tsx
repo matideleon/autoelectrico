@@ -34,7 +34,9 @@ export default async function ModelosPage() {
   return (
     <>
       <Nav />
-      <ModelGrid models={list.map(serialize)} />
+      <main id="contenido" className="page-main">
+        <ModelGrid models={list.map(serialize)} />
+      </main>
     </>
   );
 }

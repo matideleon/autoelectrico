@@ -35,10 +35,10 @@ const C = {
   surface: '#1B1E23',
   line: '#2A2E35',
   text: '#E6E8EB',
-  dim: '#8A9099',
-  faint: '#565C66',
+  dim: '#9AA1AC',
+  faint: '#828993',
   real: '#3DDC97',
-  lab: '#B8734E',
+  lab: '#C58259',
 };
 
 const mono = "'IBM Plex Mono', ui-monospace, Menlo, monospace";
@@ -65,6 +65,7 @@ export default function EfectoTeslaArticle() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Nav />
+      <main id="contenido" className="page-main">
       <article style={S.root}>
         <div style={S.wrap}>
           <header style={S.header}>
@@ -294,6 +295,7 @@ export default function EfectoTeslaArticle() {
           </footer>
         </div>
       </article>
+      </main>
     </>
   );
 }
@@ -318,7 +320,7 @@ const S: Record<string, React.CSSProperties> = {
   },
   eyebrowSmall: {
     fontFamily: mono,
-    fontSize: 10,
+    fontSize: 11,
     color: C.lab,
     textTransform: 'uppercase',
     letterSpacing: '0.1em',
@@ -375,7 +377,7 @@ const S: Record<string, React.CSSProperties> = {
   th: {
     textAlign: 'left',
     fontFamily: mono,
-    fontSize: 10,
+    fontSize: 11,
     color: C.dim,
     textTransform: 'uppercase',
     letterSpacing: '0.06em',

@@ -34,8 +34,8 @@ const C = {
   surface: '#1B1E23',
   line: '#2A2E35',
   text: '#E6E8EB',
-  dim: '#8A9099',
-  faint: '#565C66',
+  dim: '#9AA1AC',
+  faint: '#828993',
   real: '#3DDC97',
   lab: '#E8A33D',
 };
@@ -63,7 +63,7 @@ export default function CargaHogarPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Nav />
-      <main style={S.root}>
+      <main id="contenido" className="page-main" style={S.root}>
         <div style={S.wrap}>
           <header style={S.header}>
             <div style={S.eyebrow}>Guía · Carga en casa</div>
@@ -420,7 +420,7 @@ const S: Record<string, React.CSSProperties> = {
   wrap: { maxWidth: 760, margin: '0 auto' },
   header: { marginBottom: 24, paddingTop: 20 },
   eyebrow: { fontFamily: mono, fontSize: 11, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 14 },
-  eyebrowSmall: { fontFamily: mono, fontSize: 10, color: C.lab, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 10 },
+  eyebrowSmall: { fontFamily: mono, fontSize: 11, color: C.lab, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 10 },
   h1: { fontSize: 'clamp(28px, 6vw, 40px)', fontWeight: 600, letterSpacing: '-0.02em', lineHeight: 1.15, margin: '0 0 16px' },
   dek: { fontSize: 16, color: C.dim, lineHeight: 1.6, margin: '0 0 14px', maxWidth: '62ch' },
   siblingLink: { fontFamily: mono, fontSize: 12.5, color: C.real, textDecoration: 'none' },
@@ -453,7 +453,7 @@ const S: Record<string, React.CSSProperties> = {
   checklist: { fontSize: 14.5, lineHeight: 1.9, color: C.text, paddingLeft: 20, margin: 0 },
   tableWrap: { overflowX: 'auto', marginBottom: 10 },
   table: { width: '100%', borderCollapse: 'collapse', minWidth: 420 },
-  th: { textAlign: 'left', fontFamily: mono, fontSize: 10, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.06em', padding: '8px 10px', borderBottom: `1px solid ${C.line}` },
+  th: { textAlign: 'left', fontFamily: mono, fontSize: 11, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.06em', padding: '8px 10px', borderBottom: `1px solid ${C.line}` },
   td: { padding: '10px 10px', fontSize: 13, borderBottom: `1px solid ${C.line}` },
   tdMono: { fontFamily: mono },
   ctaRow: { display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 32 },

@@ -1,7 +1,7 @@
 'use client';
 
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useId } from 'react';
 
 /* ============================================================
    autoelectrico.uy — Simulador de ahorro
@@ -20,11 +20,11 @@ const C = {
   surface: '#1B1E23',
   line: '#2A2E35',
   text: '#E6E8EB',
-  dim: '#8A9099',
-  faint: '#565C66',
+  dim: '#9AA1AC',
+  faint: '#828993',
   real: '#3DDC97',
   lab: '#E8A33D',
-  gap: '#4A505A',
+  gap: '#838A94',
 };
 
 const mono = "'IBM Plex Mono', ui-monospace, Menlo, monospace";
@@ -47,14 +47,16 @@ const fmt = (n, d = 0) =>
   new Intl.NumberFormat('es-UY', { maximumFractionDigits: d, minimumFractionDigits: d }).format(n);
 
 function Field({ label, value, onChange, unit, source, step = 1 }) {
+  const id = useId();
   return (
     <div style={S.field}>
-      <label style={S.fieldLabel}>
+      <label htmlFor={id} style={S.fieldLabel}>
         {label}
         {source && <span style={S.source}> · {source}</span>}
       </label>
       <div style={S.fieldInputWrap}>
         <input
+          id={id}
           type="number"
           value={value}
           onChange={(e) => onChange(Number(e.target.value) || 0)}
@@ -335,7 +337,7 @@ const S = {
   },
   source: {
     fontFamily: mono,
-    fontSize: 10,
+    fontSize: 11,
     color: C.faint,
   },
   fieldInputWrap: { position: 'relative' },
@@ -374,7 +376,7 @@ const S = {
   },
   resultLabel: {
     fontFamily: mono,
-    fontSize: 10,
+    fontSize: 11,
     color: C.dim,
     textTransform: 'uppercase',
     letterSpacing: '0.08em',
@@ -393,7 +395,7 @@ const S = {
   },
   compareTag: {
     fontFamily: mono,
-    fontSize: 10,
+    fontSize: 11,
     color: C.faint,
     textAlign: 'center',
     marginTop: 4,

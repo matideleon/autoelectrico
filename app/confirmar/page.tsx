@@ -21,8 +21,8 @@ const C = {
   bg: '#141619',
   line: '#2A2E35',
   text: '#E6E8EB',
-  dim: '#8A9099',
-  faint: '#565C66',
+  dim: '#9AA1AC',
+  faint: '#828993',
   real: '#3DDC97',
   lab: '#E8A33D',
 };
@@ -34,7 +34,7 @@ export default async function ConfirmPage({ searchParams }: Props) {
   const ok = Boolean(sub);
 
   return (
-    <main style={S.root}>
+    <main id="contenido" className="page-main" style={S.root}>
       <div style={S.wrap}>
         <div style={{ ...S.mark, color: ok ? C.real : C.lab }}>
           {ok ? '✓' : '·'}

@@ -29,7 +29,7 @@ const AXES = [
 // Orden visual en el pentágono (arriba, horario): Batería, Baúl, Autonomía, Precio, Potencia
 const AXIS_ORDER = ['battery_kwh', 'trunk_l', 'range_km', 'price_usd', 'power_hp'];
 
-const COLORS = ['#3DDC97', '#E8A33D', '#7C9EFF', '#FF6B9D', '#B8734E'];
+const COLORS = ['#3DDC97', '#E8A33D', '#7C9EFF', '#FF6B9D', '#C58259'];
 
 const W = 520, H = 400;
 const CX = 260, CY = 210;
@@ -126,7 +126,7 @@ export default function ComparadorRadar({ list, allModels }) {
 
         {/* Etiquetas de los anillos (25/50/75/100) */}
         {gridRings.map((f) => (
-          <text key={f} x={CX + 4} y={CY - R_MAX * f + 3} fontSize="9" fontFamily="IBM Plex Mono, monospace" fill="#565C66">
+          <text key={f} x={CX + 4} y={CY - R_MAX * f + 3} fontSize="9" fontFamily="IBM Plex Mono, monospace" fill="#828993">
             {Math.round(f * 100)}
           </text>
         ))}
@@ -215,10 +215,10 @@ const S = {
     marginBottom: 8,
   },
   title: { fontSize: 16, fontWeight: 600, color: '#E6E8EB', fontFamily: "'IBM Plex Sans', sans-serif" },
-  subtitle: { fontSize: 12, color: '#8A9099', marginTop: 2, fontFamily: "'IBM Plex Sans', sans-serif" },
-  note: { fontSize: 11, color: '#8A9099', fontFamily: "'IBM Plex Mono', monospace", textAlign: 'right' },
+  subtitle: { fontSize: 12, color: '#9AA1AC', marginTop: 2, fontFamily: "'IBM Plex Sans', sans-serif" },
+  note: { fontSize: 11, color: '#9AA1AC', fontFamily: "'IBM Plex Mono', monospace", textAlign: 'right' },
   svg: { width: '100%', height: 'auto', maxWidth: 440, display: 'block', margin: '10px auto 0' },
-  empty: { fontSize: 13, color: '#565C66', textAlign: 'center', padding: '30px 10px', fontFamily: "'IBM Plex Sans', sans-serif" },
+  empty: { fontSize: 13, color: '#828993', textAlign: 'center', padding: '30px 10px', fontFamily: "'IBM Plex Sans', sans-serif" },
   legend: { display: 'flex', gap: 14, flexWrap: 'wrap', justifyContent: 'center', marginTop: 12 },
   legendItem: {
     display: 'flex', alignItems: 'center', gap: 6,
@@ -226,8 +226,8 @@ const S = {
   },
   legendDot: { width: 9, height: 9, borderRadius: '50%', display: 'inline-block' },
   gapNote: {
-    fontSize: 10.5, color: '#565C66', textAlign: 'center', marginTop: 12,
+    fontSize: 11.5, color: '#828993', textAlign: 'center', marginTop: 12,
     fontFamily: "'IBM Plex Mono', monospace", lineHeight: 1.5,
   },
-  gapMarker: { color: '#8A9099' },
+  gapMarker: { color: '#9AA1AC' },
 };

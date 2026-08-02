@@ -24,11 +24,11 @@ const C = {
   surface: '#1B1E23',
   line: '#2A2E35',
   text: '#E6E8EB',
-  dim: '#8A9099',
-  faint: '#565C66',
+  dim: '#9AA1AC',
+  faint: '#828993',
   real: '#3DDC97',
   lab: '#E8A33D',
-  gap: '#4A505A',
+  gap: '#838A94',
 };
 
 /* Estado real del catálogo hoy. Los null son verdad. */
@@ -456,7 +456,7 @@ const S = {
   rowName: { fontSize: 14, fontWeight: 500 },
   rowBrand: { color: C.faint, fontStyle: 'normal', fontWeight: 400 },
   rowVal: { fontFamily: mono, fontSize: 15, fontWeight: 500 },
-  km: { fontSize: 10, color: C.dim, fontStyle: 'normal' },
+  km: { fontSize: 11, color: C.dim, fontStyle: 'normal' },
   pending: { fontSize: 12, fontStyle: 'italic' },
   track: {
     height: 7,
@@ -485,7 +485,7 @@ const S = {
     display: 'flex',
     justifyContent: 'space-between',
     fontFamily: mono,
-    fontSize: 10,
+    fontSize: 11,
     marginTop: 6,
     gap: 10,
   },
@@ -516,7 +516,7 @@ const S = {
   labelText: {
     display: 'block',
     fontFamily: mono,
-    fontSize: 10,
+    fontSize: 11,
     color: C.dim,
     textTransform: 'uppercase',
     letterSpacing: '0.08em',
@@ -538,7 +538,7 @@ const S = {
   fieldset: { border: 0, padding: 0, margin: '0 0 20px' },
   legend: {
     fontFamily: mono,
-    fontSize: 10,
+    fontSize: 11,
     color: C.dim,
     textTransform: 'uppercase',
     letterSpacing: '0.08em',
@@ -586,7 +586,7 @@ const S = {
   },
   privacy: {
     fontFamily: mono,
-    fontSize: 10,
+    fontSize: 11,
     color: C.faint,
     textAlign: 'center',
     margin: '12px 0 0',
@@ -631,7 +631,7 @@ const S = {
     gap: 14,
     flexWrap: 'wrap',
     fontFamily: mono,
-    fontSize: 10,
+    fontSize: 11,
     color: C.dim,
     paddingTop: 18,
     borderTop: `1px solid ${C.line}`,

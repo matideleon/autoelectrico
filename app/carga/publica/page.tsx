@@ -31,8 +31,8 @@ const C = {
   surface: '#1B1E23',
   line: '#2A2E35',
   text: '#E6E8EB',
-  dim: '#8A9099',
-  faint: '#565C66',
+  dim: '#9AA1AC',
+  faint: '#828993',
   real: '#3DDC97',
   lab: '#E8A33D',
 };
@@ -60,7 +60,7 @@ export default function CargaPublicaPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Nav />
-      <main style={S.root}>
+      <main id="contenido" className="page-main" style={S.root}>
         <div style={S.wrap}>
           <header style={S.header}>
             <div style={S.eyebrow}>Guía · Carga pública</div>
@@ -269,7 +269,7 @@ const S: Record<string, React.CSSProperties> = {
   p: { fontSize: 15, lineHeight: 1.7, color: C.text, margin: '0 0 14px' },
   tableWrap: { overflowX: 'auto', marginBottom: 10 },
   table: { width: '100%', borderCollapse: 'collapse', minWidth: 560 },
-  th: { textAlign: 'left', fontFamily: mono, fontSize: 10, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.04em', padding: '8px 10px', borderBottom: `1px solid ${C.line}` },
+  th: { textAlign: 'left', fontFamily: mono, fontSize: 11, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.04em', padding: '8px 10px', borderBottom: `1px solid ${C.line}` },
   td: { padding: '10px 10px', fontSize: 12.5, borderBottom: `1px solid ${C.line}`, lineHeight: 1.5 },
   ctaRow: { display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 32 },
   ctaBtn: { fontFamily: mono, fontSize: 13, padding: '12px 18px', background: C.real, color: C.bg, borderRadius: 3, textDecoration: 'none', fontWeight: 500 },

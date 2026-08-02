@@ -15,7 +15,11 @@ const nextConfig = {
   },
 
   // El worker comparte lib/ con la app: no debe compilarse con Next.
-  serverExternalPackages: ['bullmq', 'ioredis', 'pdfjs-dist', '@aws-sdk/client-s3'],
+  // En Next 14 la clave vive bajo experimental; se llama
+  // serverExternalPackages recién a partir de Next 15.
+  experimental: {
+    serverComponentsExternalPackages: ['bullmq', 'ioredis', 'pdfjs-dist', '@aws-sdk/client-s3'],
+  },
 
   async headers() {
     const isProduction = process.env.NODE_ENV === 'production';

@@ -14,8 +14,8 @@ const C = {
   surface: '#1B1E23',
   line: '#2A2E35',
   text: '#E6E8EB',
-  dim: '#8A9099',
-  faint: '#565C66',
+  dim: '#9AA1AC',
+  faint: '#828993',
   real: '#3DDC97',
 };
 const mono = "'IBM Plex Mono', ui-monospace, Menlo, monospace";

@@ -81,7 +81,9 @@ export default async function ModelPage({ params }: Props) {
         />
       ))}
       <Nav />
-      <ModelSheet model={serialize(model)} />
+      <main id="contenido" className="page-main">
+        <ModelSheet model={serialize(model)} />
+      </main>
     </>
   );
 }

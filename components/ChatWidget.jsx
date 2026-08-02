@@ -18,11 +18,11 @@ const C = {
   surface: '#1B1E23',
   line: '#2A2E35',
   text: '#E6E8EB',
-  dim: '#8A9099',
-  faint: '#565C66',
+  dim: '#9AA1AC',
+  faint: '#828993',
   real: '#3DDC97',
   lab: '#E8A33D',
-  gap: '#4A505A',
+  gap: '#838A94',
   input: '#0E1013',
 };
 
@@ -78,6 +78,7 @@ function LeadForm({ onSubmit, loading }) {
       <input
         type="text"
         placeholder="Tu nombre"
+        aria-label="Tu nombre"
         value={name}
         onChange={e => setName(e.target.value)}
         style={S.leadInput}
@@ -86,6 +87,7 @@ function LeadForm({ onSubmit, loading }) {
       <input
         type="tel"
         placeholder="Tu teléfono o WhatsApp"
+        aria-label="Tu teléfono o WhatsApp"
         value={phone}
         onChange={e => setPhone(e.target.value)}
         style={S.leadInput}
@@ -376,6 +378,7 @@ export default function ChatWidget() {
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && send()}
             placeholder="Escribí tu pregunta..."
+            aria-label="Escribí tu pregunta"
             style={S.input}
             className="chat-in"
             disabled={loading}
@@ -539,7 +542,7 @@ const S = {
   },
   pill: {
     fontFamily: mono,
-    fontSize: 9,
+    fontSize: 11,
     color: C.lab,
     background: 'rgba(232,163,61,0.1)',
     padding: '3px 7px',
@@ -624,7 +627,7 @@ const S = {
   },
   leadTfLabel: {
     fontFamily: mono,
-    fontSize: 10,
+    fontSize: 11,
     color: C.dim,
     textTransform: 'uppercase',
     letterSpacing: '0.08em',
@@ -639,7 +642,7 @@ const S = {
   },
   leadChip: {
     fontFamily: mono,
-    fontSize: 10,
+    fontSize: 11,
     padding: '6px 10px',
     background: 'transparent',
     border: '1px solid',

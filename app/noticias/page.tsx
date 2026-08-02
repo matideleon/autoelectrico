@@ -23,10 +23,10 @@ const C = {
   surface: '#1B1E23',
   line: '#2A2E35',
   text: '#E6E8EB',
-  dim: '#8A9099',
-  faint: '#565C66',
+  dim: '#9AA1AC',
+  faint: '#828993',
   real: '#3DDC97',
-  lab: '#B8734E',
+  lab: '#C58259',
 };
 const mono = "'IBM Plex Mono', ui-monospace, Menlo, monospace";
 const sans = "'IBM Plex Sans', -apple-system, sans-serif";
@@ -43,7 +43,7 @@ export default function NoticiasPage() {
   return (
     <>
       <Nav />
-      <main style={S.root}>
+      <main id="contenido" className="page-main" style={S.root}>
         <div style={S.wrap}>
           <header style={S.header}>
             <div style={S.eyebrow}>Noticias</div>
@@ -89,7 +89,7 @@ const S: Record<string, React.CSSProperties> = {
     padding: '22px 24px', textDecoration: 'none', color: C.text,
     transition: 'border-color 150ms ease, transform 150ms ease',
   },
-  cardCategory: { fontFamily: mono, fontSize: 10, color: C.lab, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 },
+  cardCategory: { fontFamily: mono, fontSize: 11, color: C.lab, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 },
   cardTitle: { fontSize: 19, fontWeight: 600, letterSpacing: '-0.01em', lineHeight: 1.3, margin: '0 0 10px' },
   cardDek: { fontSize: 14, color: C.dim, lineHeight: 1.6, margin: '0 0 16px' },
   cardFoot: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: mono, fontSize: 11 },

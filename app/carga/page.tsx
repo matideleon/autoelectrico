@@ -22,8 +22,8 @@ const C = {
   surface: '#1B1E23',
   line: '#2A2E35',
   text: '#E6E8EB',
-  dim: '#8A9099',
-  faint: '#565C66',
+  dim: '#9AA1AC',
+  faint: '#828993',
   real: '#3DDC97',
   lab: '#E8A33D',
 };
@@ -34,7 +34,7 @@ export default function CargaIndexPage() {
   return (
     <>
       <Nav />
-      <main style={S.root}>
+      <main id="contenido" className="page-main" style={S.root}>
         <div style={S.wrap}>
           <header style={S.header}>
             <div style={S.eyebrow}>Guía · Carga</div>
@@ -88,7 +88,7 @@ const S: Record<string, React.CSSProperties> = {
     borderRadius: 8, padding: '26px 24px', textDecoration: 'none', color: C.text,
     transition: 'border-color 150ms ease, transform 150ms ease',
   },
-  cardEyebrow: { fontFamily: mono, fontSize: 10.5, color: C.lab, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 },
+  cardEyebrow: { fontFamily: mono, fontSize: 11.5, color: C.lab, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 },
   cardTitle: { fontSize: 22, fontWeight: 600, letterSpacing: '-0.01em', marginBottom: 10 },
   cardText: { fontSize: 14, color: C.dim, lineHeight: 1.6, margin: '0 0 18px' },
   cardCta: { fontFamily: mono, fontSize: 12.5, color: C.real, fontWeight: 500 },
