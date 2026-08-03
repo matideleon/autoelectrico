@@ -36,26 +36,34 @@ export default function Nav() {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '14px 20px',
+        padding: '10px 20px',
         background: 'rgba(20,22,25,0.92)',
         backdropFilter: 'blur(8px)',
         borderBottom: `1px solid ${C.line}`,
-        fontFamily: mono,
       }}
     >
       <Link
         href="/"
         style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
           fontSize: 14,
           fontWeight: 500,
           color: C.text,
           textDecoration: 'none',
           letterSpacing: '0.02em',
+          fontFamily: mono,
         }}
       >
+        <img
+          src="/logo.png"
+          alt="autoelectrico.uy"
+          style={{ height: 24, width: 'auto', display: 'block' }}
+        />
         autoelectrico<span style={{ color: C.real }}>.uy</span>
       </Link>
-      <div style={{ display: 'flex', gap: 26, alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: 26, alignItems: 'center', fontFamily: mono }}>
         <Link href="/modelos" style={linkStyle(false)}>
           Modelos
         </Link>
