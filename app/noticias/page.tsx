@@ -1,8 +1,9 @@
 // ============================================================
 // autoelectrico.uy — /noticias — Listado completo de artículos
 //
+// Estilo empata con /comparar y /ahorro.
 // Fuente única: lib/articles.js
-// Orden: el array ya viene con el más reciente primero.
+// Orden: más reciente primero.
 // ============================================================
 
 import type { Metadata } from 'next';
@@ -28,27 +29,48 @@ const C = {
   surface: '#1B1E23',
   line: '#2A2E35',
   text: '#E6E8EB',
-  dim: '#9AA1AC',
-  faint: '#828993',
+  dim: '#8A9099',
+  faint: '#565C66',
   real: '#3DDC97',
   lab: '#E8A33D',
+  gap: '#4A505A',
 };
 const mono = "'IBM Plex Mono', ui-monospace, Menlo, monospace";
 const sans = "'IBM Plex Sans', -apple-system, sans-serif";
 
 export default function NoticiasPage() {
   return (
-    <main style={{ background: C.bg, minHeight: '100vh', color: C.text, fontFamily: sans }}>
+    <div style={{ minHeight: '100vh', background: C.bg, color: C.text, fontFamily: sans }}>
       <Nav />
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 20px 80px' }}>
-        <header style={{ marginBottom: 40 }}>
-          <div style={{ fontFamily: mono, fontSize: 11, color: C.dim, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 14 }}>
-            autoelectrico.uy
-          </div>
-          <h1 style={{ fontSize: 'clamp(26px, 5.5vw, 36px)', fontWeight: 600, letterSpacing: '-0.02em', lineHeight: 1.2, margin: '0 0 12px' }}>
-            Noticias
+      <main style={{ maxWidth: 720, margin: '0 auto', padding: '40px 20px 80px' }}>
+        <header style={{ marginBottom: 32 }}>
+          <p style={{
+            fontFamily: mono,
+            fontSize: 11,
+            color: C.dim,
+            textTransform: 'uppercase',
+            letterSpacing: '0.12em',
+            marginBottom: 12,
+            margin: '0 0 12px 0',
+          }}>
+            NOTICIAS
+          </p>
+          <h1 style={{
+            fontSize: 'clamp(28px, 6vw, 40px)',
+            fontWeight: 600,
+            letterSpacing: '-0.02em',
+            margin: '0 0 12px',
+            lineHeight: 1.1,
+          }}>
+            Artículos
           </h1>
-          <p style={{ fontSize: 15, color: C.dim, lineHeight: 1.6, margin: 0, maxWidth: '56ch' }}>
+          <p style={{
+            fontSize: 14,
+            color: C.dim,
+            lineHeight: 1.6,
+            margin: 0,
+            maxWidth: '56ch',
+          }}>
             Lanzamientos, análisis de mercado y resúmenes semanales sobre movilidad eléctrica en Uruguay y el mundo.
           </p>
         </header>
@@ -71,21 +93,39 @@ export default function NoticiasPage() {
                 <span style={{ fontFamily: mono, fontSize: 10.5, color: C.faint }}>
                   {a.date}
                 </span>
-                <span style={{ fontFamily: mono, fontSize: 10, color: C.lab, border: `1px solid ${C.lab}`, borderRadius: 3, padding: '2px 6px', letterSpacing: '0.04em' }}>
+                <span style={{
+                  fontFamily: mono,
+                  fontSize: 10,
+                  color: C.lab,
+                  border: `1px solid ${C.lab}`,
+                  borderRadius: 3,
+                  padding: '2px 6px',
+                  letterSpacing: '0.04em',
+                }}>
                   {a.category}
                 </span>
               </div>
-              <h2 style={{ fontSize: 16, fontWeight: 600, margin: '0 0 6px', lineHeight: 1.3 }}>
+              <h2 style={{
+                fontSize: 16,
+                fontWeight: 600,
+                margin: '0 0 6px',
+                lineHeight: 1.3,
+              }}>
                 {a.title}
               </h2>
-              <p style={{ fontSize: 14, color: C.dim, lineHeight: 1.5, margin: 0 }}>
+              <p style={{
+                fontSize: 14,
+                color: C.dim,
+                lineHeight: 1.5,
+                margin: 0,
+              }}>
                 {a.dek}
               </p>
             </Link>
           ))}
         </div>
-      </div>
+      </main>
       <style>{`.noticia-link:hover { background: ${C.surface}; }`}</style>
-    </main>
+    </div>
   );
 }
