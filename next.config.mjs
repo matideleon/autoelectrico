@@ -21,6 +21,19 @@ const nextConfig = {
     serverComponentsExternalPackages: ['bullmq', 'ioredis', 'pdfjs-dist', '@aws-sdk/client-s3'],
   },
 
+  // La nota semanal del 26 jul – 1 ago se reescribió como análisis
+  // del RAV4 PHEV (solo autos que se venden en Uruguay). El slug
+  // viejo ya circuló, así que se redirige en vez de romperse.
+  async redirects() {
+    return [
+      {
+        source: '/blog/la-semana-electrica-26jul-1ago',
+        destination: '/blog/toyota-rav4-phev-uruguay',
+        permanent: true,
+      },
+    ];
+  },
+
   async headers() {
     const isProduction = process.env.NODE_ENV === 'production';
 
