@@ -134,10 +134,19 @@ function ModelCard({ m }) {
             )}
           </span>
         </div>
+        {/* Fábrica: WLTP, o NEDC si la marca no publica WLTP. La
+            etiqueta cambia con el ciclo — mezclarlos haría que la
+            tarjeta mienta por comparación con las de al lado. */}
         <div style={S.rangeRow}>
-          <span style={{ ...S.rangeLabel, color: C.lab }}>WLTP fábrica</span>
+          <span style={{ ...S.rangeLabel, color: C.lab }}>
+            {wltp == null && m.range_nedc_km != null ? 'NEDC fábrica' : 'WLTP fábrica'}
+          </span>
           <span style={{ ...S.rangeVal, color: C.lab }}>
-            {wltp ? <>{fmt(wltp)} <em style={S.unit}>km</em></> : '—'}
+            {(wltp ?? m.range_nedc_km) ? (
+              <>{fmt(wltp ?? m.range_nedc_km)} <em style={S.unit}>km</em></>
+            ) : (
+              '—'
+            )}
           </span>
         </div>
       </div>

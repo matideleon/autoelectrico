@@ -9,10 +9,24 @@ import { modelVisibility, requireAdmin, NotFoundError } from './auth';
 import type { Actor, Model, ModelFilters } from './types';
 import { TIER1_REQUIRED } from './types';
 
+/** Qué campos Tier 1 le faltan a un modelo para poder publicarse.
+ *
+ *  Excepción del ciclo de homologación: algunas marcas solo publican
+ *  NEDC y nunca WLTP (la Chevrolet Captiva EV es el caso testigo). Para
+ *  esos, tener range_nedc_km alcanza — el requisito real es "hay una
+ *  autonomía declarada con su ciclo identificado", no "hay WLTP".
+ *  Lo que no se acepta nunca es cargar un NEDC en la columna WLTP. */
+function missingTier1(m: Model): (keyof Model)[] {
+  return TIER1_REQUIRED.filter((f) => {
+    if (f === 'range_wltp_km' && m.range_nedc_km != null) return false;
+    return m[f] === null || m[f] === undefined;
+  });
+}
+
 const LIST_COLS = `
   m.id, m.slug, m.brand, m.model, m.variant, m.year_from, m.body, m.status,
   m.price_usd, m.price_source, m.price_updated_at,
-  m.battery_kwh, m.battery_chemistry, m.range_wltp_km, m.range_real_km, m.range_real_n, m.range_real_source,
+  m.battery_kwh, m.battery_chemistry, m.range_wltp_km, m.range_nedc_km, m.range_real_km, m.range_real_n, m.range_real_source,
   m.consumption_kwh_100,
   m.charge_ac_kw, m.charge_dc_kw, m.charge_10_80_min, m.connector_ac, m.connector_dc,
   m.power_hp, m.power_kw, m.torque_nm, m.accel_0_100_s, m.top_speed_kmh, m.drivetrain,
@@ -166,7 +180,7 @@ export async function getModelBySlug(
     const m = await queryOne<Model>(`SELECT * FROM models WHERE slug = $1`, [slug]);
     if (!m) throw new NotFoundError(`Modelo ${slug} no existe`);
 
-    const missing = TIER1_REQUIRED.filter((f) => m[f] === null || m[f] === undefined);
+    const missing = missingTier1(m);
     if (missing.length) return { ok: false, missing: missing as string[] };
 
     await query(
@@ -187,6 +201,6 @@ export async function getModelBySlug(
       slug: m.slug,
       brand: m.brand,
       model: m.model,
-      missing: TIER1_REQUIRED.filter((f) => m[f] === null || m[f] === undefined),
+      missing: missingTier1(m),
     }));
   }

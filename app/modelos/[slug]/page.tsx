@@ -23,7 +23,7 @@ interface Props {
 }
 
 const NUMERIC_FIELDS = [
-  'price_usd', 'battery_kwh', 'battery_usable_kwh', 'range_wltp_km',
+  'price_usd', 'battery_kwh', 'battery_usable_kwh', 'range_wltp_km', 'range_nedc_km',
   'range_real_km', 'range_real_n', 'consumption_kwh_100', 'charge_ac_kw',
   'charge_dc_kw', 'charge_10_80_min', 'power_hp', 'power_kw', 'torque_nm',
   'accel_0_100_s', 'top_speed_kmh', 'seats', 'trunk_l', 'frunk_l',

@@ -43,6 +43,9 @@ export interface Model {
   battery_usable_kwh: number | null;
   battery_chemistry: BatteryChem | null;
   range_wltp_km: number | null;
+  /** Ciclo NEDC. NO comparable con WLTP: infla en el entorno del 20%.
+   *  Algunas marcas (ej. Chevrolet con la Captiva EV) solo publican este. */
+  range_nedc_km: number | null;
   range_real_km: number | null;
   range_real_source: string | null;
   range_real_n: number | null;

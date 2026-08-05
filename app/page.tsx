@@ -17,7 +17,7 @@ export default async function Home() {
   // Modelos con precio verificado, los más accesibles primero.
   const destacados = await query(
     `SELECT slug, brand, model, variant, price_usd, battery_kwh,
-            range_wltp_km, range_real_km
+            range_wltp_km, range_nedc_km, range_real_km
      FROM models
      WHERE status = 'published' AND price_usd IS NOT NULL
      ORDER BY price_usd ASC

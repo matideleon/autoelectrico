@@ -31,6 +31,10 @@ export function modelDescription(m: Partial<Model>): string {
     bits.push(`Autonomía real medida: ${m.range_real_km} km.`);
   } else if (m.range_wltp_km) {
     bits.push(`Autonomía WLTP: ${m.range_wltp_km} km.`);
+  } else if (m.range_nedc_km) {
+    // Se nombra el ciclo: es lo único que publica la marca y no es
+    // equivalente al WLTP del resto del catálogo.
+    bits.push(`Autonomía NEDC: ${m.range_nedc_km} km.`);
   }
 
   if (m.battery_kwh) bits.push(`Batería de ${m.battery_kwh} kWh.`);
@@ -110,7 +114,7 @@ export function vehicleJsonLd(m: Partial<Model>): Record<string, unknown> {
 
   // Rango: se declara el REAL si existe; si no, el WLTP.
   // Nunca ambos como si fueran lo mismo.
-  const range = m.range_real_km ?? m.range_wltp_km;
+  const range = m.range_real_km ?? m.range_wltp_km ?? m.range_nedc_km;
   if (range) {
     ld.vehicleRange = {
       '@type': 'QuantitativeValue',
@@ -186,6 +190,11 @@ export function faqJsonLd(m: Partial<Model>): Record<string, unknown> | null {
     qa.push({
       q: `¿Cuál es la autonomía del ${m.brand} ${m.model}?`,
       a: `El fabricante declara ${m.range_wltp_km} km bajo ciclo WLTP, una medición de laboratorio. Todavía no tenemos mediciones reales de usuarios en Uruguay: en uso cotidiano la cifra suele ser menor.`,
+    });
+  } else if (m.range_nedc_km) {
+    qa.push({
+      q: `¿Cuál es la autonomía del ${m.brand} ${m.model}?`,
+      a: `El fabricante declara ${m.range_nedc_km} km bajo ciclo NEDC, y no publica cifra WLTP para este modelo. El NEDC es un protocolo de laboratorio más antiguo y optimista que el WLTP, así que no es comparable con los km WLTP de otros modelos: para la misma batería, la diferencia entre ambos ciclos ronda el 20%. Todavía no tenemos mediciones reales de usuarios en Uruguay.`,
     });
   }
 

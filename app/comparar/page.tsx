@@ -20,7 +20,7 @@ export default async function CompararPage() {
   // El comparador necesita la ficha completa, no el resumen del listado
   const rows = await query(
     `SELECT slug, brand, model, variant, price_usd, price_updated_at,
-            battery_kwh, range_wltp_km, range_real_km, range_real_n,
+            battery_kwh, range_wltp_km, range_nedc_km, range_real_km, range_real_n,
             consumption_kwh_100, charge_ac_kw, charge_dc_kw, charge_10_80_min,
             power_hp, accel_0_100_s, seats, trunk_l, warranty_battery
      FROM models

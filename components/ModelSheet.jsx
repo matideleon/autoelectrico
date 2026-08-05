@@ -132,29 +132,44 @@ const LABELS = {
 };
 const label = (v) => (v == null ? null : LABELS[v] ?? v);
 
-/* ---------- Signature: comparador de autonomía ---------- */
-function RangeBars({ wltp, real, n, source, max = 500 }) {
-  const wPct = wltp ? (wltp / max) * 100 : 0;
+/* ---------- Signature: comparador de autonomía ----------
+   La barra de fábrica muestra WLTP cuando existe. Cuando la marca
+   solo publica NEDC (Chevrolet con la Captiva EV, por ejemplo) se
+   muestra ese, etiquetado como tal — nunca disfrazado de WLTP.
+   El NEDC es un ciclo viejo y benévolo: para la misma batería de
+   51 kWh, el Omoda E5 declara 422 km NEDC y 350 km WLTP.
+   Por eso no se comparan entre sí y por eso no se calcula el
+   delta contra la autonomía real cuando el dato es NEDC.        */
+function RangeBars({ wltp, nedc, real, n, source, max = 500 }) {
+  const esNedc = wltp == null && nedc != null;
+  const lab = wltp ?? nedc ?? null;
+  const ciclo = esNedc ? 'NEDC' : 'WLTP';
+
+  const wPct = lab ? (lab / max) * 100 : 0;
   const rPct = real ? (real / max) * 100 : 0;
+  // Solo se compara real contra WLTP. Contra NEDC el número
+  // exagera la caída y sugiere una precisión que no tenemos.
   const delta = wltp && real ? Math.round(((real - wltp) / wltp) * 100) : null;
 
   return (
     <div style={{ marginTop: 4 }}>
-      {/* WLTP */}
-      <div style={{ marginBottom: 22 }}>
+      {/* Fábrica: WLTP, o NEDC si es lo único que publica la marca */}
+      <div style={{ marginBottom: esNedc ? 10 : 22 }}>
         <div style={S.barHead}>
-          <span style={{ ...S.barLabel, color: C.lab }}>WLTP · laboratorio</span>
+          <span style={{ ...S.barLabel, color: C.lab }}>
+            {ciclo} · laboratorio
+          </span>
           <span style={{ ...S.barValue, color: C.lab }}>
-            {fmt(wltp) ?? '—'} <em style={S.unit}>km</em>
+            {fmt(lab) ?? '—'} <em style={S.unit}>km</em>
           </span>
         </div>
         <div
           style={S.track}
           role="img"
           aria-label={
-            wltp
-              ? `Autonomía WLTP de laboratorio: ${wltp} kilómetros`
-              : 'Autonomía WLTP sin dato'
+            lab
+              ? `Autonomía ${ciclo} de laboratorio: ${lab} kilómetros`
+              : 'Autonomía de fábrica sin dato'
           }
         >
           <div
@@ -167,6 +182,15 @@ function RangeBars({ wltp, real, n, source, max = 500 }) {
           />
         </div>
       </div>
+
+      {esNedc && (
+        <div style={S.cicloNota}>
+          El fabricante no publica WLTP para este modelo. El NEDC es un
+          protocolo más viejo y optimista: no lo compares con los WLTP del
+          resto del catálogo. De referencia, el Omoda E5 declara 422 km NEDC
+          y 350 km WLTP con la misma batería.
+        </div>
+      )}
 
       {/* Real */}
       <div>
@@ -311,12 +335,16 @@ function PriceBlock({ m }) {
 
 /* ---------- Barra de completitud ---------- */
 function Completeness({ m }) {
+  // range_declarado: cuenta si hay WLTP o, en su defecto, NEDC.
+  // Un modelo que solo publica NEDC no tiene un hueco de datos:
+  // tiene el dato que existe.
+  const m2 = { ...m, range_declarado: m.range_wltp_km ?? m.range_nedc_km };
   const fields = [
-    'price_usd', 'battery_kwh', 'range_wltp_km', 'range_real_km',
+    'price_usd', 'battery_kwh', 'range_declarado', 'range_real_km',
     'charge_ac_kw', 'charge_dc_kw', 'charge_10_80_min', 'consumption_kwh_100',
     'power_hp', 'seats', 'importer', 'warranty_battery',
   ];
-  const have = fields.filter((f) => m[f] != null).length;
+  const have = fields.filter((f) => m2[f] != null).length;
   const pct = Math.round((have / fields.length) * 100);
 
   return (
@@ -413,6 +441,7 @@ export default function ModelSheet({ model }) {
           </p>
           <RangeBars
             wltp={m.range_wltp_km}
+            nedc={m.range_nedc_km}
             real={m.range_real_km}
             n={m.range_real_n}
             source={m.range_real_source}
@@ -713,6 +742,17 @@ const S = {
     letterSpacing: '0.05em',
     background: C.bg,
     padding: '0 6px',
+  },
+  cicloNota: {
+    fontFamily: mono,
+    fontSize: 10.5,
+    lineHeight: 1.6,
+    color: C.faint,
+    background: 'rgba(197,130,89,0.07)',
+    borderLeft: `2px solid ${C.lab}`,
+    padding: '9px 12px',
+    borderRadius: '0 4px 4px 0',
+    marginBottom: 22,
   },
   barFoot: {
     display: 'flex',

@@ -84,6 +84,17 @@ function formatModel(m: Partial<Model>, idx: number): string {
   field('Batería', m.battery_kwh, ' kWh');
   field('Autonomía WLTP (laboratorio)', m.range_wltp_km, ' km');
 
+  // Si la marca solo publica NEDC, se pasa etiquetado y con la
+  // advertencia: el bot no debe compararlo contra los WLTP de
+  // otros modelos como si fueran la misma medición.
+  if (m.range_wltp_km == null && m.range_nedc_km != null) {
+    lines.push(
+      `  Autonomía NEDC (laboratorio): ${m.range_nedc_km} km — el fabricante NO publica WLTP para este modelo. ` +
+        `El NEDC es un ciclo más viejo y optimista: NO lo compares con los km WLTP de otros modelos. ` +
+        `Si te preguntan por autonomía, aclarale al usuario que este dato está en otro ciclo.`
+    );
+  }
+
   if (m.range_real_km != null) {
     const n = m.range_real_n ? ` sobre ${m.range_real_n} mediciones` : '';
     lines.push(`  Autonomía REAL (medida por usuarios): ${m.range_real_km} km${n}`);
