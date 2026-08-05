@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { ARTICLES } from '@/lib/articles';
+import { C, mono, sans, formatArticleDate } from '@/lib/theme';
 
 /* ============================================================
    NewsFeed — la portada del sitio.
@@ -11,28 +12,6 @@ import { ARTICLES } from '@/lib/articles';
    hay dos listas que se puedan desincronizar.
    ============================================================ */
 
-const C = {
-  bg: '#141619',
-  surface: '#1B1E23',
-  line: '#2A2E35',
-  text: '#E6E8EB',
-  dim: '#9AA1AC',
-  faint: '#828993',
-  real: '#3DDC97',
-  lab: '#C58259',
-};
-
-const mono = "'IBM Plex Mono', ui-monospace, Menlo, monospace";
-const sans = "'IBM Plex Sans', -apple-system, sans-serif";
-
-function formatDate(iso) {
-  return new Date(iso).toLocaleDateString('es-UY', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
-}
-
 function ArticleCard({ article, featured }) {
   return (
     <a href={`/blog/${article.slug}`} className="news-card" style={{ ...S.card, ...(featured ? S.cardFeatured : {}) }}>
@@ -40,7 +19,9 @@ function ArticleCard({ article, featured }) {
       <h2 style={{ ...S.cardTitle, fontSize: featured ? 26 : 18 }}>{article.title}</h2>
       <p style={S.cardDek}>{article.dek}</p>
       <div style={S.cardFoot}>
-        <span style={S.cardDate}>{formatDate(article.date)}</span>
+        <span style={S.cardDate}>
+          <time dateTime={article.date}>{formatArticleDate(article.date)}</time>
+        </span>
         <span style={S.cardRead} data-read>Leer →</span>
       </div>
     </a>
